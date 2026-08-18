@@ -1,0 +1,35 @@
+{
+  "id": "01801801-8018-4018-8018-018018018018",
+  "task_name": "acto/forecast-update-001",
+  "trial_name": "forecast-update__trial-018",
+  "trial_uri": "forecast-update__trial-018",
+  "task_id": {"path": "tasks/forecast-update-001"},
+  "source": "acto-case-study",
+  "task_checksum": "sha256:6c1a9666c4f84f0a",
+  "config": {
+    "task": {"path": "tasks/forecast-update-001", "source": "acto-case-study"},
+    "trial_name": "forecast-update__trial-018",
+    "trials_dir": "demo_data/harbor_job",
+    "agent": {"name": "claude-code", "model_name": "claude-sonnet-4.6"},
+    "environment": {"type": "docker"},
+    "verifier": {},
+    "artifacts": [],
+    "job_id": "13dc2a40-0dc6-4a32-b6db-40b670aa1080"
+  },
+  "agent_info": {
+    "name": "claude-code",
+    "version": "2.1.80",
+    "model_info": {"name": "claude-sonnet-4.6", "provider": "anthropic"}
+  },
+  "agent_result": {
+    "n_input_tokens": 7130,
+    "n_cache_tokens": 2100,
+    "n_output_tokens": 1480,
+    "cost_usd": 0.18
+  },
+  "verifier_result": {"rewards": {"reward": 1.0}},
+  "verifier_environment_mode": "separate",
+  "exception_info": null,
+  "started_at": "2026-08-17T16:04:10Z",
+  "finished_at": "2026-08-17T16:08:32Z"
+}

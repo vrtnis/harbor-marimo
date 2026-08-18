@@ -1,0 +1,126 @@
+{
+  "id": "13dc2a40-0dc6-4a32-b6db-40b670aa1080",
+  "started_at": "2026-08-17T16:00:00Z",
+  "updated_at": "2026-08-17T16:12:44Z",
+  "finished_at": "2026-08-17T16:12:44Z",
+  "n_total_trials": 3,
+  "stats": {
+    "n_completed_trials": 3,
+    "n_errored_trials": 0,
+    "n_running_trials": 0,
+    "n_pending_trials": 0,
+    "n_cancelled_trials": 0,
+    "n_retries": 0,
+    "n_input_tokens": 18540,
+    "n_cache_tokens": 4200,
+    "n_output_tokens": 3980,
+    "cost_usd": 0.41
+  },
+  "trial_results": [
+    {
+      "id": "01701701-7017-4017-8017-017017017017",
+      "task_name": "acto/forecast-update-001",
+      "trial_name": "forecast-update__trial-017",
+      "trial_uri": "forecast-update__trial-017",
+      "task_id": {"path": "tasks/forecast-update-001"},
+      "source": "acto-case-study",
+      "task_checksum": "sha256:6c1a9666c4f84f0a",
+      "config": {
+        "task": {"path": "tasks/forecast-update-001", "source": "acto-case-study"},
+        "trial_name": "forecast-update__trial-017",
+        "trials_dir": "demo_data/harbor_job",
+        "agent": {"name": "codex", "model_name": "gpt-5.6"},
+        "environment": {"type": "docker"},
+        "verifier": {},
+        "artifacts": [],
+        "job_id": "13dc2a40-0dc6-4a32-b6db-40b670aa1080"
+      },
+      "agent_info": {
+        "name": "codex",
+        "version": "0.93.0",
+        "model_info": {"name": "gpt-5.6", "provider": "openai"}
+      },
+      "agent_result": {
+        "n_input_tokens": 6240,
+        "n_cache_tokens": 1400,
+        "n_output_tokens": 1290,
+        "cost_usd": 0.14
+      },
+      "verifier_result": {"rewards": {"reward": 1.0}},
+      "verifier_environment_mode": "separate",
+      "exception_info": null,
+      "started_at": "2026-08-17T16:00:00Z",
+      "finished_at": "2026-08-17T16:04:09Z"
+    },
+    {
+      "id": "01801801-8018-4018-8018-018018018018",
+      "task_name": "acto/forecast-update-001",
+      "trial_name": "forecast-update__trial-018",
+      "trial_uri": "forecast-update__trial-018",
+      "task_id": {"path": "tasks/forecast-update-001"},
+      "source": "acto-case-study",
+      "task_checksum": "sha256:6c1a9666c4f84f0a",
+      "config": {
+        "task": {"path": "tasks/forecast-update-001", "source": "acto-case-study"},
+        "trial_name": "forecast-update__trial-018",
+        "trials_dir": "demo_data/harbor_job",
+        "agent": {"name": "claude-code", "model_name": "claude-sonnet-4.6"},
+        "environment": {"type": "docker"},
+        "verifier": {},
+        "artifacts": [],
+        "job_id": "13dc2a40-0dc6-4a32-b6db-40b670aa1080"
+      },
+      "agent_info": {
+        "name": "claude-code",
+        "version": "2.1.80",
+        "model_info": {"name": "claude-sonnet-4.6", "provider": "anthropic"}
+      },
+      "agent_result": {
+        "n_input_tokens": 7130,
+        "n_cache_tokens": 2100,
+        "n_output_tokens": 1480,
+        "cost_usd": 0.18
+      },
+      "verifier_result": {"rewards": {"reward": 1.0}},
+      "verifier_environment_mode": "separate",
+      "exception_info": null,
+      "started_at": "2026-08-17T16:04:10Z",
+      "finished_at": "2026-08-17T16:08:32Z"
+    },
+    {
+      "id": "01901901-9019-4019-8019-019019019019",
+      "task_name": "acto/forecast-update-001",
+      "trial_name": "forecast-update__trial-019",
+      "trial_uri": "forecast-update__trial-019",
+      "task_id": {"path": "tasks/forecast-update-001"},
+      "source": "acto-case-study",
+      "task_checksum": "sha256:6c1a9666c4f84f0a",
+      "config": {
+        "task": {"path": "tasks/forecast-update-001", "source": "acto-case-study"},
+        "trial_name": "forecast-update__trial-019",
+        "trials_dir": "demo_data/harbor_job",
+        "agent": {"name": "mini-swe-agent", "model_name": "gpt-5.4-mini"},
+        "environment": {"type": "docker"},
+        "verifier": {},
+        "artifacts": [],
+        "job_id": "13dc2a40-0dc6-4a32-b6db-40b670aa1080"
+      },
+      "agent_info": {
+        "name": "mini-swe-agent",
+        "version": "1.16.0",
+        "model_info": {"name": "gpt-5.4-mini", "provider": "openai"}
+      },
+      "agent_result": {
+        "n_input_tokens": 5170,
+        "n_cache_tokens": 700,
+        "n_output_tokens": 1210,
+        "cost_usd": 0.09
+      },
+      "verifier_result": {"rewards": {"reward": 0.0}},
+      "verifier_environment_mode": "separate",
+      "exception_info": null,
+      "started_at": "2026-08-17T16:08:33Z",
+      "finished_at": "2026-08-17T16:12:44Z"
+    }
+  ]
+}

@@ -1,0 +1,85 @@
+{
+  "schema_version": "ATIF-v1.7",
+  "trajectory_id": "traj-forecast-018",
+  "session_id": "session-forecast-018",
+  "agent": {
+    "name": "claude-code",
+    "version": "2.1.80",
+    "model_name": "claude-sonnet-4.6"
+  },
+  "steps": [
+    {
+      "step_id": 1,
+      "timestamp": "2026-08-17T16:04:20Z",
+      "source": "user",
+      "message": "Update the FY27 forecast using the supplied assumptions. Preserve the workbook structure and logic."
+    },
+    {
+      "step_id": 2,
+      "timestamp": "2026-08-17T16:04:51Z",
+      "source": "agent",
+      "message": "I will trace the FY27 EBITDA formula back to its assumptions.",
+      "tool_calls": [
+        {
+          "tool_call_id": "call-018-1",
+          "function_name": "python",
+          "arguments": {"command": "inspect Forecast!F16 dependencies"}
+        }
+      ],
+      "observation": {
+        "results": [
+          {"source_call_id": "call-018-1", "content": "Forecast!F16 depends on FY27 revenue, gross margin, and operating-expense assumptions."}
+        ]
+      }
+    },
+    {
+      "step_id": 3,
+      "timestamp": "2026-08-17T16:06:33Z",
+      "source": "agent",
+      "message": "I will update the FY27 assumption cells and preserve the forecast formulas.",
+      "tool_calls": [
+        {
+          "tool_call_id": "call-018-2",
+          "function_name": "python",
+          "arguments": {"command": "Assumptions!F6 = 5.2632%; Assumptions!F7 = 52.0%"}
+        }
+      ],
+      "observation": {
+        "results": [
+          {"source_call_id": "call-018-2", "content": "Assumptions updated; Forecast!F16 remains a formula and recalculates to 47.2."}
+        ]
+      }
+    },
+    {
+      "step_id": 4,
+      "timestamp": "2026-08-17T16:07:29Z",
+      "source": "agent",
+      "message": "I will validate the workbook and save the deliverable.",
+      "tool_calls": [
+        {
+          "tool_call_id": "call-018-3",
+          "function_name": "python",
+          "arguments": {"command": "recalculate and verify forecast.xlsx"}
+        }
+      ],
+      "observation": {
+        "results": [
+          {"source_call_id": "call-018-3", "content": "Workbook checks pass; FY27 EBITDA = 47.2."}
+        ]
+      }
+    },
+    {
+      "step_id": 5,
+      "timestamp": "2026-08-17T16:08:02Z",
+      "source": "agent",
+      "message": "The FY27 forecast has been updated through the model assumptions."
+    }
+  ],
+  "final_metrics": {
+    "total_prompt_tokens": 7130,
+    "total_cached_tokens": 2100,
+    "total_completion_tokens": 1480,
+    "total_cost_usd": 0.18,
+    "total_steps": 5
+  }
+}

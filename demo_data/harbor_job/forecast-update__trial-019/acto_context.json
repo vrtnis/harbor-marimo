@@ -1,0 +1,13 @@
+{
+  "headline": "The verifier catches an incomplete update.",
+  "expert_status": "Aligned",
+  "expert_summary": "The agent inspected the workbook but did not apply the supplied FY27 assumptions, so the output remains below target.",
+  "focus_cell": "Forecast!F16",
+  "focus_label": "FY27 EBITDA",
+  "artifact_kind": "Excel workbook",
+  "verifier_checks": [
+    {"label": "Workbook produced", "status": "pass"},
+    {"label": "Workbook opens", "status": "pass"},
+    {"label": "FY27 EBITDA = $47.2M", "status": "fail"}
+  ]
+}

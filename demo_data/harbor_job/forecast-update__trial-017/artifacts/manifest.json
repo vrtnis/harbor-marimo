@@ -1,0 +1,9 @@
+[
+  {
+    "source": "/workspace/forecast.xlsx",
+    "destination": "artifacts/workspace/forecast.xlsx",
+    "type": "file",
+    "status": "ok",
+    "service": null
+  }
+]

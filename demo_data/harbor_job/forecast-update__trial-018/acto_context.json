@@ -1,0 +1,13 @@
+{
+  "headline": "The verifier outcome and artifact evidence align.",
+  "expert_status": "Aligned",
+  "expert_summary": "The FY27 assumptions were updated and the EBITDA output remains formula-driven.",
+  "focus_cell": "Forecast!F16",
+  "focus_label": "FY27 EBITDA",
+  "artifact_kind": "Excel workbook",
+  "verifier_checks": [
+    {"label": "Workbook produced", "status": "pass"},
+    {"label": "Workbook opens", "status": "pass"},
+    {"label": "FY27 EBITDA = $47.2M", "status": "pass"}
+  ]
+}
