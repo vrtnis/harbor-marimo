@@ -1,0 +1,70 @@
+[project]
+name = "harbor-marimo"
+version = "0.1.0"
+description = "Reactive, reproducible analysis workspaces for Harbor jobs and ATIF trajectories."
+readme = "README.md"
+requires-python = ">=3.12"
+license = "Apache-2.0"
+authors = [{ name = "harbor-marimo contributors" }]
+keywords = ["harbor", "marimo", "atif", "evaluation", "agents"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "License :: OSI Approved :: Apache Software License",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Topic :: Scientific/Engineering :: Information Analysis",
+]
+dependencies = [
+  "marimo>=0.18,<1",
+]
+
+[project.optional-dependencies]
+acto = [
+  "openpyxl>=3.1.5,<4",
+]
+plugin = [
+  "harbor>=0.20,<0.21",
+]
+
+[dependency-groups]
+dev = [
+  "harbor>=0.20,<0.21",
+  "openpyxl>=3.1.5,<4",
+]
+
+[project.scripts]
+harbor-marimo = "harbor_marimo.cli:main"
+
+[project.entry-points."harbor.plugins"]
+marimo = "harbor_marimo.plugin:MarimoPlugin"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/harbor_marimo"]
+
+[tool.hatch.build.targets.sdist]
+include = [
+  "/CONTRIBUTING.md",
+  "/LICENSE",
+  "/README.md",
+  "/demo.py",
+  "/demo_data",
+  "/examples",
+  "/pyproject.toml",
+  "/scripts",
+  "/src",
+  "/tests",
+]
+exclude = [
+  "/.venv",
+  "/__marimo__",
+  "/node_modules",
+  "/outputs",
+  "**/__marimo__",
+  "**/__pycache__",
+  "**/*.pyc",
+]
