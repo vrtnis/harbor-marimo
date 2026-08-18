@@ -8,8 +8,8 @@ It is the programmable analysis layer beside Harbor's operational viewer: use Ha
 run and monitor evaluations; use `harbor-marimo` when an investigation needs custom
 comparisons, domain evidence, or a notebook that can be reviewed and rerun.
 
-This repository is currently an alpha source package. It is not yet published to PyPI or
-listed as an official Harbor community integration.
+`harbor-marimo` is in active development. It is currently an alpha source package and is
+not yet published to PyPI or listed as an official Harbor community integration.
 
 ## What it does
 
@@ -21,17 +21,8 @@ listed as an official Harbor community integration.
 - Opens a generic Marimo workspace for comparisons and evidence inspection.
 - Provides a small Harbor plugin that prints the analysis handoff and can export tables
   after a job.
-- Keeps domain-specific applications separate. The included Acto financial-review app is
-  the first example.
-
-## What it deliberately does not do
-
-- Replace Harbor's native viewer or job operations.
-- Train agents, execute evaluations, or provide remote execution infrastructure.
-- Interpret every reward of `1` as a pass or every `0` as a failure.
-- Execute collected artifacts, scripts, HTML, workbooks, macros, archives, or pickles.
-- Require the Harbor plugin or start a browser/server inside a Harbor worker.
-- Hard-code financial workbook concepts into the generic package.
+- Keeps domain-specific applications separate. The included app is the first domain
+  example.
 
 ## Quick start from this repository
 
