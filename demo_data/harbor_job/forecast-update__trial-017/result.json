@@ -1,13 +1,13 @@
 {
   "id": "01701701-7017-4017-8017-017017017017",
-  "task_name": "acto/forecast-update-001",
+  "task_name": "example/forecast-update-001",
   "trial_name": "forecast-update__trial-017",
   "trial_uri": "forecast-update__trial-017",
   "task_id": {"path": "tasks/forecast-update-001"},
-  "source": "acto-case-study",
+  "source": "domain-example",
   "task_checksum": "sha256:6c1a9666c4f84f0a",
   "config": {
-    "task": {"path": "tasks/forecast-update-001", "source": "acto-case-study"},
+    "task": {"path": "tasks/forecast-update-001", "source": "domain-example"},
     "trial_name": "forecast-update__trial-017",
     "trials_dir": "demo_data/harbor_job",
     "agent": {"name": "codex", "model_name": "gpt-5.6"},

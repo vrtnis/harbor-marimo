@@ -20,7 +20,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-acto = [
+domain = [
   "openpyxl>=3.1.5,<4",
 ]
 plugin = [

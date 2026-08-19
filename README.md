@@ -117,7 +117,7 @@ uv run marimo run demo.py --port 2718
 ```
 
 It adds workbook-specific review semantics on top of Harbor trials. See the
-[domain example documentation](examples/).
+[domain example documentation](examples/domain-financial-review/README.md).
 
 ## Design
 

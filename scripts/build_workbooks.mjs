@@ -283,7 +283,7 @@ async function buildModel(filePath, variant) {
     summary,
     "A1:H2",
     "Northstar Software — Forecast Summary",
-    "Illustrative artifact used in the Acto × Harbor × marimo integration demo"
+    "Illustrative artifact used in the Harbor + Marimo domain example"
   );
   summary.getRange("A5:B5").merge();
   summary.getRange("D5:E5").merge();
@@ -350,8 +350,8 @@ async function buildModel(filePath, variant) {
   summary.getRange("A21:H23").merge(true);
   summary.getRange("A21:H23").values = [
     ["Demo note"],
-    ["This is a synthetic workbook used to make Harbor's artifact handoff visible. The case study is about the integration pattern, not the finance example."],
-    ["Open the Forecast sheet to inspect the underlying formulas and assumptions."],
+    ["Synthetic workbook used to demonstrate Harbor artifact analysis."],
+    ["Open the Forecast sheet to inspect formulas and assumptions."],
   ];
   summary.getRange("A21:H21").format = {
     fill: palette.navy,

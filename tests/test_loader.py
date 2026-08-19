@@ -1,7 +1,7 @@
 from pathlib import Path
 import unittest
 
-from acto_harbor_demo.harbor_loader import (
+from domain_harbor_demo.harbor_loader import (
     load_harbor_job,
     load_harbor_source,
     trajectory_metrics,

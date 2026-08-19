@@ -1,4 +1,4 @@
-"""Helpers for the Acto Harbor + marimo case-study demo."""
+"""Helpers for the Harbor + Marimo domain example."""
 
 from .harbor_loader import (
     HarborJob,

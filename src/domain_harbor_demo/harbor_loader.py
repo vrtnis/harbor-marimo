@@ -113,7 +113,7 @@ def load_harbor_job(job_dir: str | Path) -> HarborJob:
         stored_result = _read_json(trial_dir / "result.json")
         trajectory = _read_json(trial_dir / "agent" / "trajectory.json")
         manifest = _read_json(trial_dir / "artifacts" / "manifest.json")
-        context_path = trial_dir / "acto_context.json"
+        context_path = trial_dir / "domain_context.json"
         context = _read_json(context_path) if context_path.exists() else {}
         trials.append(
             TrialRecord(

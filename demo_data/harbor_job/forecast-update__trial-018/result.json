@@ -1,13 +1,13 @@
 {
   "id": "01801801-8018-4018-8018-018018018018",
-  "task_name": "acto/forecast-update-001",
+  "task_name": "example/forecast-update-001",
   "trial_name": "forecast-update__trial-018",
   "trial_uri": "forecast-update__trial-018",
   "task_id": {"path": "tasks/forecast-update-001"},
-  "source": "acto-case-study",
+  "source": "domain-example",
   "task_checksum": "sha256:6c1a9666c4f84f0a",
   "config": {
-    "task": {"path": "tasks/forecast-update-001", "source": "acto-case-study"},
+    "task": {"path": "tasks/forecast-update-001", "source": "domain-example"},
     "trial_name": "forecast-update__trial-018",
     "trials_dir": "demo_data/harbor_job",
     "agent": {"name": "claude-code", "model_name": "claude-sonnet-4.6"},

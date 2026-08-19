@@ -1,4 +1,4 @@
-# Acto financial-review example
+# Domain financial-review example
 
 This example shows the domain-expert layer that can be built on top of `harbor-marimo`.
 It compares three synthetic Harbor trials for a financial forecast update, exposes their
@@ -15,7 +15,7 @@ uv run marimo run demo.py --port 2718
 The app and fixtures currently live at the repository root for continuity with the proof
 of concept:
 
-- `demo.py` — Acto-specific Marimo application
+- `demo.py` — domain-specific Marimo application
 - `demo_data/harbor_job/` — synthetic Harbor job with three trials
 - `scripts/build_workbooks.mjs` — deterministic workbook fixture builder
 

@@ -10,7 +10,7 @@ def _():
     from html import escape
     import marimo as mo
 
-    from acto_harbor_demo.harbor_loader import (
+    from domain_harbor_demo.harbor_loader import (
         load_harbor_source,
         trajectory_metrics,
         trajectory_rows,
@@ -60,103 +60,103 @@ def _(mo):
     component_css = """
         <style>
         :root {
-          --acto-ink: #182230;
-          --acto-muted: #667085;
-          --acto-line: #e2e7ee;
-          --acto-soft: #f7f9fc;
-          --acto-navy: #182a3f;
-          --acto-teal: #087f73;
-          --acto-aqua: #e9f8f4;
-          --acto-amber: #fff5dc;
-          --acto-red: #b42318;
+          --hm-domain-ink: #182230;
+          --hm-domain-muted: #667085;
+          --hm-domain-line: #e2e7ee;
+          --hm-domain-soft: #f7f9fc;
+          --hm-domain-navy: #182a3f;
+          --hm-domain-teal: #087f73;
+          --hm-domain-aqua: #e9f8f4;
+          --hm-domain-amber: #fff5dc;
+          --hm-domain-red: #b42318;
         }
-        body { background: #f5f7fa; color: var(--acto-ink); }
+        body { background: #f5f7fa; color: var(--hm-domain-ink); }
         main { max-width: 1480px !important; padding-top: 18px !important; }
-        .acto-shell { font-family: Inter, ui-sans-serif, system-ui, sans-serif; }
-        .acto-topbar {
+        .hm-domain-shell { font-family: Inter, ui-sans-serif, system-ui, sans-serif; }
+        .hm-domain-topbar {
           display: flex; justify-content: space-between; align-items: center; gap: 18px;
-          padding: 13px 18px; background: #fff; border: 1px solid var(--acto-line);
+          padding: 13px 18px; background: #fff; border: 1px solid var(--hm-domain-line);
           border-radius: 14px; box-shadow: 0 4px 14px rgba(25,39,61,.04);
         }
-        .acto-brand { display:flex; align-items:center; gap:12px; }
-        .acto-mark { width:34px; height:34px; border-radius:10px; color:#fff; background:var(--acto-navy); display:flex; align-items:center; justify-content:center; font-weight:800; }
-        .acto-topbar h1 { margin:0; font-size:18px; line-height:1.2; letter-spacing:-.015em; }
-        .acto-topbar p { margin:3px 0 0; color:var(--acto-muted); font-size:12px; }
-        .acto-meta { display:flex; flex-wrap:wrap; justify-content:flex-end; gap:7px; }
-        .acto-meta span { color:#475467; background:var(--acto-soft); border:1px solid var(--acto-line); padding:5px 8px; border-radius:999px; font-size:11px; white-space:nowrap; }
-        .acto-sourcebar { padding:10px 14px; background:#fff; border:1px solid var(--acto-line); border-radius:14px; }
-        .acto-source-title { display:flex; justify-content:space-between; gap:10px; align-items:center; margin-bottom:4px; }
-        .acto-source-title strong { font-size:13px; }
-        .acto-source-title span { color:var(--acto-muted); font-size:11px; }
-        .acto-toolbar-title { margin:0 0 2px; font-size:13px; font-weight:750; }
-        .acto-toolbar-copy { color:var(--acto-muted); font-size:11px; margin:0; }
-        .acto-panel { background:#fff; border:1px solid var(--acto-line); border-radius:14px; padding:17px; box-shadow:0 5px 16px rgba(25,39,61,.045); }
-        .acto-panel h2 { font-size:16px; margin:0 0 5px; letter-spacing:-.01em; }
-        .acto-panel p { color:var(--acto-muted); line-height:1.48; margin:4px 0 12px; font-size:12px; }
-        .acto-panel-head { display:flex; justify-content:space-between; align-items:flex-start; gap:12px; margin-bottom:10px; }
-        .acto-kpis { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:10px; margin-bottom:14px; }
-        .acto-kpi { background:#fff; border:1px solid var(--acto-line); border-radius:12px; padding:13px 14px; }
-        .acto-kpi .label { color:var(--acto-muted); font-size:10px; text-transform:uppercase; letter-spacing:.07em; font-weight:750; }
-        .acto-kpi .value { font-size:22px; font-weight:780; margin-top:4px; letter-spacing:-.025em; }
-        .acto-table { width:100%; border-collapse:separate; border-spacing:0; overflow:hidden; border:1px solid var(--acto-line); border-radius:11px; }
-        .acto-table th { background:#f0f4f8; color:#344054; text-align:left; padding:9px 10px; font-size:10px; text-transform:uppercase; letter-spacing:.05em; }
-        .acto-table td { padding:10px; border-top:1px solid var(--acto-line); font-size:12px; vertical-align:top; }
-        .acto-table tbody tr:hover td { background:#f8fbfd; }
-        .acto-table td:not(:first-child) { font-variant-numeric:tabular-nums; }
-        .acto-pass, .acto-fail, .acto-review { padding:4px 7px; border-radius:999px; font-size:10px; font-weight:750; white-space:nowrap; }
-        .acto-pass { color:#067647; background:#ecfdf3; border:1px solid #abefc6; }
-        .acto-fail { color:#b42318; background:#fef3f2; border:1px solid #fecdca; }
-        .acto-review { color:#934f00; background:var(--acto-amber); border:1px solid #f3cf83; }
-        .acto-check { display:flex; gap:9px; align-items:center; padding:9px 0; border-bottom:1px solid var(--acto-line); font-size:12px; }
-        .acto-check:last-child { border-bottom:0; }
-        .acto-focus { background:var(--acto-amber) !important; box-shadow:inset 0 0 0 2px #e9a23b; font-weight:760; }
-        .acto-callout { border-left:3px solid var(--acto-teal); background:var(--acto-aqua); border-radius:9px; padding:11px 12px; margin-top:11px; font-size:12px; line-height:1.45; }
-        .acto-callout.warning { border-left-color:#d97706; background:var(--acto-amber); }
-        .acto-callout strong { display:block; margin-bottom:3px; }
-        .acto-review-head { background:#fff; border:1px solid var(--acto-line); border-radius:12px; padding:13px 14px; }
-        .acto-review-head h2 { margin:0; font-size:15px; }
-        .acto-review-head p { margin:4px 0 0; color:var(--acto-muted); font-size:11px; line-height:1.45; }
-        .acto-receipt { padding:10px 12px; border-radius:9px; background:#ecfdf3; border:1px solid #abefc6; color:#067647; font-size:12px; }
-        .acto-runbar { display:grid; grid-template-columns:repeat(auto-fit,minmax(118px,1fr)); gap:8px; margin:10px 0 14px; }
-        .acto-runstep { min-height:70px; border:1px solid var(--acto-line); border-radius:10px; padding:9px; background:#fff; }
-        .acto-runstep.selected { border-color:var(--acto-teal); box-shadow:inset 0 0 0 1px var(--acto-teal); background:var(--acto-aqua); }
-        .acto-runstep .num { color:var(--acto-teal); font-size:10px; text-transform:uppercase; letter-spacing:.06em; font-weight:780; }
-        .acto-runstep strong { display:block; font-size:11px; margin-top:5px; line-height:1.35; }
-        .acto-evidence-grid { display:grid; grid-template-columns:minmax(0,1.5fr) minmax(280px,.65fr); gap:14px; }
-        .acto-evidence { border:1px solid var(--acto-line); border-radius:10px; padding:11px 12px; margin-top:9px; background:var(--acto-soft); }
-        .acto-evidence .label { color:var(--acto-muted); font-size:9px; text-transform:uppercase; letter-spacing:.07em; font-weight:750; margin-bottom:4px; }
-        .acto-evidence .content { font-size:12px; line-height:1.5; overflow-wrap:anywhere; }
-        .acto-code { font-family:ui-monospace,SFMono-Regular,Menlo,monospace; color:#31546f; }
-        .acto-footnote { color:var(--acto-muted); font-size:10px; margin-top:10px; }
-        .acto-error { color:#b42318; background:#fef3f2; border:1px solid #fecdca; border-radius:8px; padding:8px 10px; font-size:11px; margin-bottom:6px; }
-        .acto-loaded { color:#475467; font-size:10px; overflow-wrap:anywhere; margin-bottom:6px; }
-        .acto-analysis-intro { display:flex; justify-content:space-between; align-items:flex-start; gap:18px; padding:16px 17px; background:linear-gradient(120deg,#182a3f,#24445d); border-radius:14px; color:#fff; }
-        .acto-analysis-intro h2 { margin:0 0 5px; font-size:17px; letter-spacing:-.01em; }
-        .acto-analysis-intro p { margin:0; color:#d8e4ec; font-size:12px; line-height:1.5; max-width:760px; }
-        .acto-analysis-intro .tag { color:#d4fff5; border:1px solid rgba(153,246,228,.38); background:rgba(8,127,115,.3); padding:5px 8px; border-radius:999px; font-size:10px; font-weight:750; white-space:nowrap; }
-        .acto-analysis-note { display:flex; align-items:flex-start; gap:10px; padding:11px 13px; border:1px solid #b9e5db; background:#f0fbf8; border-radius:11px; font-size:12px; line-height:1.5; }
-        .acto-analysis-note strong { color:var(--acto-teal); white-space:nowrap; }
-        .acto-behavior-list { display:grid; gap:9px; }
-        .acto-behavior { border:1px solid var(--acto-line); background:#fff; border-radius:12px; padding:12px 13px; }
-        .acto-behavior-head { display:flex; justify-content:space-between; align-items:flex-start; gap:12px; margin-bottom:9px; }
-        .acto-behavior-head strong { font-size:12px; }
-        .acto-behavior-head small { display:block; margin-top:3px; color:var(--acto-muted); font-size:10px; }
-        .acto-behavior-badges { display:flex; gap:5px; flex-wrap:wrap; justify-content:flex-end; }
-        .acto-profile { display:grid; grid-template-columns:78px minmax(90px,1fr) 30px; align-items:center; gap:8px; margin-top:6px; }
-        .acto-profile label { color:var(--acto-muted); font-size:10px; }
-        .acto-meter { height:7px; background:#e9eef3; border-radius:999px; overflow:hidden; }
-        .acto-meter span { display:block; height:100%; border-radius:999px; background:var(--acto-teal); min-width:3px; }
-        .acto-meter.change span { background:#52779b; }
-        .acto-profile b { font-size:10px; text-align:right; font-variant-numeric:tabular-nums; }
-        .acto-behavior-stats { display:flex; flex-wrap:wrap; gap:12px; margin-top:10px; color:#475467; font-size:10px; }
-        .acto-behavior-stats b { color:var(--acto-ink); }
-        .acto-empty { padding:28px; text-align:center; color:var(--acto-muted); background:#fff; border:1px dashed #cbd5df; border-radius:12px; font-size:12px; }
+        .hm-domain-brand { display:flex; align-items:center; gap:12px; }
+        .hm-domain-mark { width:34px; height:34px; border-radius:10px; color:#fff; background:var(--hm-domain-navy); display:flex; align-items:center; justify-content:center; font-weight:800; }
+        .hm-domain-topbar h1 { margin:0; font-size:18px; line-height:1.2; letter-spacing:-.015em; }
+        .hm-domain-topbar p { margin:3px 0 0; color:var(--hm-domain-muted); font-size:12px; }
+        .hm-domain-meta { display:flex; flex-wrap:wrap; justify-content:flex-end; gap:7px; }
+        .hm-domain-meta span { color:#475467; background:var(--hm-domain-soft); border:1px solid var(--hm-domain-line); padding:5px 8px; border-radius:999px; font-size:11px; white-space:nowrap; }
+        .hm-domain-sourcebar { padding:10px 14px; background:#fff; border:1px solid var(--hm-domain-line); border-radius:14px; }
+        .hm-domain-source-title { display:flex; justify-content:space-between; gap:10px; align-items:center; margin-bottom:4px; }
+        .hm-domain-source-title strong { font-size:13px; }
+        .hm-domain-source-title span { color:var(--hm-domain-muted); font-size:11px; }
+        .hm-domain-toolbar-title { margin:0 0 2px; font-size:13px; font-weight:750; }
+        .hm-domain-toolbar-copy { color:var(--hm-domain-muted); font-size:11px; margin:0; }
+        .hm-domain-panel { background:#fff; border:1px solid var(--hm-domain-line); border-radius:14px; padding:17px; box-shadow:0 5px 16px rgba(25,39,61,.045); }
+        .hm-domain-panel h2 { font-size:16px; margin:0 0 5px; letter-spacing:-.01em; }
+        .hm-domain-panel p { color:var(--hm-domain-muted); line-height:1.48; margin:4px 0 12px; font-size:12px; }
+        .hm-domain-panel-head { display:flex; justify-content:space-between; align-items:flex-start; gap:12px; margin-bottom:10px; }
+        .hm-domain-kpis { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:10px; margin-bottom:14px; }
+        .hm-domain-kpi { background:#fff; border:1px solid var(--hm-domain-line); border-radius:12px; padding:13px 14px; }
+        .hm-domain-kpi .label { color:var(--hm-domain-muted); font-size:10px; text-transform:uppercase; letter-spacing:.07em; font-weight:750; }
+        .hm-domain-kpi .value { font-size:22px; font-weight:780; margin-top:4px; letter-spacing:-.025em; }
+        .hm-domain-table { width:100%; border-collapse:separate; border-spacing:0; overflow:hidden; border:1px solid var(--hm-domain-line); border-radius:11px; }
+        .hm-domain-table th { background:#f0f4f8; color:#344054; text-align:left; padding:9px 10px; font-size:10px; text-transform:uppercase; letter-spacing:.05em; }
+        .hm-domain-table td { padding:10px; border-top:1px solid var(--hm-domain-line); font-size:12px; vertical-align:top; }
+        .hm-domain-table tbody tr:hover td { background:#f8fbfd; }
+        .hm-domain-table td:not(:first-child) { font-variant-numeric:tabular-nums; }
+        .hm-domain-pass, .hm-domain-fail, .hm-domain-review { padding:4px 7px; border-radius:999px; font-size:10px; font-weight:750; white-space:nowrap; }
+        .hm-domain-pass { color:#067647; background:#ecfdf3; border:1px solid #abefc6; }
+        .hm-domain-fail { color:#b42318; background:#fef3f2; border:1px solid #fecdca; }
+        .hm-domain-review { color:#934f00; background:var(--hm-domain-amber); border:1px solid #f3cf83; }
+        .hm-domain-check { display:flex; gap:9px; align-items:center; padding:9px 0; border-bottom:1px solid var(--hm-domain-line); font-size:12px; }
+        .hm-domain-check:last-child { border-bottom:0; }
+        .hm-domain-focus { background:var(--hm-domain-amber) !important; box-shadow:inset 0 0 0 2px #e9a23b; font-weight:760; }
+        .hm-domain-callout { border-left:3px solid var(--hm-domain-teal); background:var(--hm-domain-aqua); border-radius:9px; padding:11px 12px; margin-top:11px; font-size:12px; line-height:1.45; }
+        .hm-domain-callout.warning { border-left-color:#d97706; background:var(--hm-domain-amber); }
+        .hm-domain-callout strong { display:block; margin-bottom:3px; }
+        .hm-domain-review-head { background:#fff; border:1px solid var(--hm-domain-line); border-radius:12px; padding:13px 14px; }
+        .hm-domain-review-head h2 { margin:0; font-size:15px; }
+        .hm-domain-review-head p { margin:4px 0 0; color:var(--hm-domain-muted); font-size:11px; line-height:1.45; }
+        .hm-domain-receipt { padding:10px 12px; border-radius:9px; background:#ecfdf3; border:1px solid #abefc6; color:#067647; font-size:12px; }
+        .hm-domain-runbar { display:grid; grid-template-columns:repeat(auto-fit,minmax(118px,1fr)); gap:8px; margin:10px 0 14px; }
+        .hm-domain-runstep { min-height:70px; border:1px solid var(--hm-domain-line); border-radius:10px; padding:9px; background:#fff; }
+        .hm-domain-runstep.selected { border-color:var(--hm-domain-teal); box-shadow:inset 0 0 0 1px var(--hm-domain-teal); background:var(--hm-domain-aqua); }
+        .hm-domain-runstep .num { color:var(--hm-domain-teal); font-size:10px; text-transform:uppercase; letter-spacing:.06em; font-weight:780; }
+        .hm-domain-runstep strong { display:block; font-size:11px; margin-top:5px; line-height:1.35; }
+        .hm-domain-evidence-grid { display:grid; grid-template-columns:minmax(0,1.5fr) minmax(280px,.65fr); gap:14px; }
+        .hm-domain-evidence { border:1px solid var(--hm-domain-line); border-radius:10px; padding:11px 12px; margin-top:9px; background:var(--hm-domain-soft); }
+        .hm-domain-evidence .label { color:var(--hm-domain-muted); font-size:9px; text-transform:uppercase; letter-spacing:.07em; font-weight:750; margin-bottom:4px; }
+        .hm-domain-evidence .content { font-size:12px; line-height:1.5; overflow-wrap:anywhere; }
+        .hm-domain-code { font-family:ui-monospace,SFMono-Regular,Menlo,monospace; color:#31546f; }
+        .hm-domain-footnote { color:var(--hm-domain-muted); font-size:10px; margin-top:10px; }
+        .hm-domain-error { color:#b42318; background:#fef3f2; border:1px solid #fecdca; border-radius:8px; padding:8px 10px; font-size:11px; margin-bottom:6px; }
+        .hm-domain-loaded { color:#475467; font-size:10px; overflow-wrap:anywhere; margin-bottom:6px; }
+        .hm-domain-analysis-intro { display:flex; justify-content:space-between; align-items:flex-start; gap:18px; padding:16px 17px; background:linear-gradient(120deg,#182a3f,#24445d); border-radius:14px; color:#fff; }
+        .hm-domain-analysis-intro h2 { margin:0 0 5px; font-size:17px; letter-spacing:-.01em; }
+        .hm-domain-analysis-intro p { margin:0; color:#d8e4ec; font-size:12px; line-height:1.5; max-width:760px; }
+        .hm-domain-analysis-intro .tag { color:#d4fff5; border:1px solid rgba(153,246,228,.38); background:rgba(8,127,115,.3); padding:5px 8px; border-radius:999px; font-size:10px; font-weight:750; white-space:nowrap; }
+        .hm-domain-analysis-note { display:flex; align-items:flex-start; gap:10px; padding:11px 13px; border:1px solid #b9e5db; background:#f0fbf8; border-radius:11px; font-size:12px; line-height:1.5; }
+        .hm-domain-analysis-note strong { color:var(--hm-domain-teal); white-space:nowrap; }
+        .hm-domain-behavior-list { display:grid; gap:9px; }
+        .hm-domain-behavior { border:1px solid var(--hm-domain-line); background:#fff; border-radius:12px; padding:12px 13px; }
+        .hm-domain-behavior-head { display:flex; justify-content:space-between; align-items:flex-start; gap:12px; margin-bottom:9px; }
+        .hm-domain-behavior-head strong { font-size:12px; }
+        .hm-domain-behavior-head small { display:block; margin-top:3px; color:var(--hm-domain-muted); font-size:10px; }
+        .hm-domain-behavior-badges { display:flex; gap:5px; flex-wrap:wrap; justify-content:flex-end; }
+        .hm-domain-profile { display:grid; grid-template-columns:78px minmax(90px,1fr) 30px; align-items:center; gap:8px; margin-top:6px; }
+        .hm-domain-profile label { color:var(--hm-domain-muted); font-size:10px; }
+        .hm-domain-meter { height:7px; background:#e9eef3; border-radius:999px; overflow:hidden; }
+        .hm-domain-meter span { display:block; height:100%; border-radius:999px; background:var(--hm-domain-teal); min-width:3px; }
+        .hm-domain-meter.change span { background:#52779b; }
+        .hm-domain-profile b { font-size:10px; text-align:right; font-variant-numeric:tabular-nums; }
+        .hm-domain-behavior-stats { display:flex; flex-wrap:wrap; gap:12px; margin-top:10px; color:#475467; font-size:10px; }
+        .hm-domain-behavior-stats b { color:var(--hm-domain-ink); }
+        .hm-domain-empty { padding:28px; text-align:center; color:var(--hm-domain-muted); background:#fff; border:1px dashed #cbd5df; border-radius:12px; font-size:12px; }
         @media (max-width: 900px) {
-          .acto-topbar { align-items:flex-start; flex-direction:column; }
-          .acto-meta { justify-content:flex-start; }
-          .acto-kpis { grid-template-columns:repeat(2,1fr); }
-          .acto-evidence-grid { grid-template-columns:1fr; }
-          .acto-analysis-intro { flex-direction:column; }
+          .hm-domain-topbar { align-items:flex-start; flex-direction:column; }
+          .hm-domain-meta { justify-content:flex-start; }
+          .hm-domain-kpis { grid-template-columns:repeat(2,1fr); }
+          .hm-domain-evidence-grid { grid-template-columns:1fr; }
+          .hm-domain-analysis-intro { flex-direction:column; }
         }
         </style>
         """
@@ -349,7 +349,7 @@ def _(mo, trajectory_rows, trial):
 @app.cell
 def _(escape):
     def badge(text, kind="pass"):
-        css = {"pass": "acto-pass", "fail": "acto-fail", "review": "acto-review"}[kind]
+        css = {"pass": "hm-domain-pass", "fail": "hm-domain-fail", "review": "hm-domain-review"}[kind]
         return f'<span class="{css}">{escape(str(text))}</span>'
 
     def money_or_text(value):
@@ -367,15 +367,15 @@ def _(badge, component_css, escape, job, loaded_source, mo, trial):
     _reward_kind = "pass" if trial.reward == 1.0 else "fail"
     workspace_header = mo.Html(
         f"""{component_css}
-        <div class="acto-shell acto-topbar">
-          <div class="acto-brand">
-            <div class="acto-mark">A</div>
+        <div class="hm-domain-shell hm-domain-topbar">
+          <div class="hm-domain-brand">
+            <div class="hm-domain-mark">FR</div>
             <div>
               <h1>Evaluation review</h1>
               <p>{escape(trial.task_name)} · inspect the work, evidence, and agent trace</p>
             </div>
           </div>
-          <div class="acto-meta">
+          <div class="hm-domain-meta">
             <span>{escape(loaded_source.kind)}</span>
             <span>Job {escape(job.id[:8])}</span>
             <span>{escape(trial.agent_name)} · {escape(trial.model_name)}</span>
@@ -391,15 +391,15 @@ def _(badge, component_css, escape, job, loaded_source, mo, trial):
 def _(component_css, escape, loaded_source, mo, source_error, source_input):
     if source_error:
         _source_feedback = mo.Html(
-            f'{component_css}<div class="acto-shell acto-error"><strong>Could not load that source.</strong> {escape(source_error)} The sample job remains open.</div>'
+            f'{component_css}<div class="hm-domain-shell hm-domain-error"><strong>Could not load that source.</strong> {escape(source_error)} The sample job remains open.</div>'
         )
     else:
         _source_feedback = mo.Html(
-            f'{component_css}<div class="acto-shell acto-loaded">Loaded {escape(loaded_source.kind.lower())}: {escape(str(loaded_source.requested_path))}</div>'
+            f'{component_css}<div class="hm-domain-shell hm-domain-loaded">Loaded {escape(loaded_source.kind.lower())}: {escape(str(loaded_source.requested_path))}</div>'
         )
     source_heading = mo.Html(
         f"""{component_css}
-        <div class="acto-shell acto-source-title">
+        <div class="hm-domain-shell hm-domain-source-title">
           <strong>Harbor source</strong>
           <span>Paste a job folder or agent/trajectory.json; it loads after you pause</span>
         </div>
@@ -416,9 +416,9 @@ def _(component_css, escape, loaded_source, mo, source_error, source_input):
 def _(artifact_mode, component_css, mo, trial_picker):
     toolbar_heading = mo.Html(
         f"""{component_css}
-        <div class="acto-shell">
-          <p class="acto-toolbar-title">Review workspace</p>
-          <p class="acto-toolbar-copy">Choose a run, inspect its workbook, then record your judgment.</p>
+        <div class="hm-domain-shell">
+          <p class="hm-domain-toolbar-title">Review workspace</p>
+          <p class="hm-domain-toolbar-copy">Choose a run, inspect its workbook, then record your judgment.</p>
         </div>
         """
     )
@@ -451,22 +451,22 @@ def _(
         _cells = []
         for _grid_column_index, _grid_value in enumerate(_grid_row):
             _grid_focus = _grid_row_index == 5 and _grid_column_index == 3
-            _grid_css = ' class="acto-focus"' if _grid_focus else ""
+            _grid_css = ' class="hm-domain-focus"' if _grid_focus else ""
             _cells.append(f"<td{_grid_css}>{money_or_text(_grid_value)}</td>")
         _body_rows.append(f"<tr>{''.join(_cells)}</tr>")
 
     artifact_panel = mo.Html(
         f"""{component_css}
-        <div class="acto-shell acto-panel">
-          <div class="acto-panel-head">
+        <div class="hm-domain-shell hm-domain-panel">
+          <div class="hm-domain-panel-head">
             <div><h2>Work product</h2><p>{escape(trial.context.get('artifact_kind', 'Artifact'))} · {escape(artifact_path.name)}</p></div>
             {badge(artifact_mode.value.title(), 'review')}
           </div>
-          <table class="acto-table">
+          <table class="hm-domain-table">
             <thead><tr>{_header}</tr></thead>
             <tbody>{''.join(_body_rows)}</tbody>
           </table>
-          <div class="acto-footnote">Review focus: {escape(trial.context.get('focus_cell', '—'))}. Highlighted evidence is selected for expert attention.</div>
+          <div class="hm-domain-footnote">Review focus: {escape(trial.context.get('focus_cell', '—'))}. Highlighted evidence is selected for expert attention.</div>
         </div>
         """
     )
@@ -475,13 +475,13 @@ def _(
     for _verifier_check in trial.context.get("verifier_checks", []):
         _verifier_kind = "pass" if _verifier_check["status"] == "pass" else "fail"
         _checks.append(
-            f'<div class="acto-check">{badge(_verifier_check["status"].upper(), _verifier_kind)}<span>{escape(_verifier_check["label"])}</span></div>'
+            f'<div class="hm-domain-check">{badge(_verifier_check["status"].upper(), _verifier_kind)}<span>{escape(_verifier_check["label"])}</span></div>'
         )
     _reward_kind = "pass" if trial.reward == 1.0 else "fail"
     verifier_panel = mo.Html(
         f"""{component_css}
-        <div class="acto-shell acto-panel">
-          <div class="acto-panel-head"><div><h2>Automated checks</h2><p>Harbor verifier evidence</p></div>{badge(f'Reward {trial.reward:.1f}', _reward_kind)}</div>
+        <div class="hm-domain-shell hm-domain-panel">
+          <div class="hm-domain-panel-head"><div><h2>Automated checks</h2><p>Harbor verifier evidence</p></div>{badge(f'Reward {trial.reward:.1f}', _reward_kind)}</div>
           {''.join(_checks)}
         </div>
         """
@@ -495,12 +495,12 @@ def _(badge, component_css, decision_input, escape, mo, note_input, trial):
     _prior_kind = "review" if _prior_status == "Needs review" else "pass"
     review_heading = mo.Html(
         f"""{component_css}
-        <div class="acto-shell acto-review-head">
-          <div class="acto-panel-head">
+        <div class="hm-domain-shell hm-domain-review-head">
+          <div class="hm-domain-panel-head">
             <div><h2>Your expert review</h2><p>Make the final call independently of the automated reward.</p></div>
             {badge(_prior_status, _prior_kind)}
           </div>
-          <div class="acto-callout{' warning' if _prior_kind == 'review' else ''}">
+          <div class="hm-domain-callout{' warning' if _prior_kind == 'review' else ''}">
             <strong>Existing expert context</strong>
             {escape(trial.context.get('expert_summary', 'No prior expert note recorded.'))}
           </div>
@@ -511,7 +511,7 @@ def _(badge, component_css, decision_input, escape, mo, note_input, trial):
     _current_note = escape(note_input.value.strip())
     _current_detail = f" — {_current_note}" if _current_note else ""
     review_receipt = mo.Html(
-        f'{component_css}<div class="acto-shell acto-receipt"><strong>Current decision: {_current_decision}</strong>{_current_detail}<br><span>Changes are reflected immediately in the run trace.</span></div>'
+        f'{component_css}<div class="hm-domain-shell hm-domain-receipt"><strong>Current decision: {_current_decision}</strong>{_current_detail}<br><span>Changes are reflected immediately in the run trace.</span></div>'
     )
     review_panel = mo.vstack(
         [review_heading, decision_input, note_input, review_receipt], gap=0.55
@@ -555,7 +555,7 @@ def _(
             _run_summary = f"{_run_summary[:43]}…"
         _selected_css = " selected" if _run_row["step"] == selected_trace["step"] else ""
         _run_steps.append(
-            f'<div class="acto-runstep{_selected_css}"><div class="num">Step {escape(_run_row["step"])} · {escape(_run_row["source"])}</div><strong>{escape(_run_summary)}</strong></div>'
+            f'<div class="hm-domain-runstep{_selected_css}"><div class="num">Step {escape(_run_row["step"])} · {escape(_run_row["source"])}</div><strong>{escape(_run_summary)}</strong></div>'
         )
 
     _message = selected_trace["message"] or "No narrative message recorded for this event."
@@ -570,22 +570,22 @@ def _(
 
     trajectory_detail = mo.Html(
         f"""{component_css}
-        <div class="acto-shell acto-panel">
-          <div class="acto-panel-head">
+        <div class="hm-domain-shell hm-domain-panel">
+          <div class="hm-domain-panel-head">
             <div><h2>Run map</h2><p>{escape(trial.trajectory.get('schema_version', 'ATIF'))} · {len(trace_rows)} recorded events</p></div>
             {badge(f"Step {selected_trace['step']}", 'review')}
           </div>
-          <div class="acto-runbar">{''.join(_run_steps)}</div>
-          <div class="acto-evidence-grid">
+          <div class="hm-domain-runbar">{''.join(_run_steps)}</div>
+          <div class="hm-domain-evidence-grid">
             <div>
-              <div class="acto-evidence"><div class="label">Agent message</div><div class="content">{escape(_message)}</div></div>
-              <div class="acto-evidence"><div class="label">Action</div><div class="content acto-code">{escape(_action)}</div></div>
-              <div class="acto-evidence"><div class="label">Observation</div><div class="content">{escape(_outcome)}</div></div>
+              <div class="hm-domain-evidence"><div class="label">Agent message</div><div class="content">{escape(_message)}</div></div>
+              <div class="hm-domain-evidence"><div class="label">Action</div><div class="content hm-domain-code">{escape(_action)}</div></div>
+              <div class="hm-domain-evidence"><div class="label">Observation</div><div class="content">{escape(_outcome)}</div></div>
             </div>
             <div>
-              <div class="acto-evidence"><div class="label">Expert decision</div><div class="content">{badge(_current_decision, _expert_kind)}</div></div>
-              <div class="acto-evidence"><div class="label">Expert note</div><div class="content">{escape(str(_current_note) or 'No note entered.')}</div></div>
-              <div class="acto-callout"><strong>Why this event matters</strong>Use the action and observation together to determine whether the work product is trustworthy—not merely whether the agent reported success.</div>
+              <div class="hm-domain-evidence"><div class="label">Expert decision</div><div class="content">{badge(_current_decision, _expert_kind)}</div></div>
+              <div class="hm-domain-evidence"><div class="label">Expert note</div><div class="content">{escape(str(_current_note) or 'No note entered.')}</div></div>
+              <div class="hm-domain-callout"><strong>Why this event matters</strong>Use the action and observation together to determine whether the work product is trustworthy—not merely whether the agent reported success.</div>
             </div>
           </div>
         </div>
@@ -612,16 +612,16 @@ def _(badge, component_css, escape, job, mo):
         )
     queue_view = mo.Html(
         f"""{component_css}
-        <div class="acto-shell">
-          <div class="acto-kpis">
-            <div class="acto-kpi"><div class="label">Queue</div><div class="value">{len(job.trials)}</div></div>
-            <div class="acto-kpi"><div class="label">Completed</div><div class="value">{job.result['stats']['n_completed_trials']}</div></div>
-            <div class="acto-kpi"><div class="label">Mean reward</div><div class="value">{job.mean_reward:.2f}</div></div>
-            <div class="acto-kpi"><div class="label">Artifacts</div><div class="value">{sum(len(item.manifest) for item in job.trials)}</div></div>
+        <div class="hm-domain-shell">
+          <div class="hm-domain-kpis">
+            <div class="hm-domain-kpi"><div class="label">Queue</div><div class="value">{len(job.trials)}</div></div>
+            <div class="hm-domain-kpi"><div class="label">Completed</div><div class="value">{job.result['stats']['n_completed_trials']}</div></div>
+            <div class="hm-domain-kpi"><div class="label">Mean reward</div><div class="value">{job.mean_reward:.2f}</div></div>
+            <div class="hm-domain-kpi"><div class="label">Artifacts</div><div class="value">{sum(len(item.manifest) for item in job.trials)}</div></div>
           </div>
-          <div class="acto-panel">
-            <div class="acto-panel-head"><div><h2>Review queue</h2><p>Choose any trial above to open it in the workspace.</p></div></div>
-            <table class="acto-table">
+          <div class="hm-domain-panel">
+            <div class="hm-domain-panel-head"><div><h2>Review queue</h2><p>Choose any trial above to open it in the workspace.</p></div></div>
+            <table class="hm-domain-table">
               <thead><tr><th>Trial</th><th>Agent</th><th>Model</th><th>Reward</th><th>Expert status</th></tr></thead>
               <tbody>{''.join(_trial_rows)}</tbody>
             </table>
@@ -685,14 +685,14 @@ def _(
         _validation_width = int(100 * _metrics["validation_actions"] / _max_actions)
         _behavior_rows.append(
             f"""
-            <div class="acto-behavior">
-              <div class="acto-behavior-head">
+            <div class="hm-domain-behavior">
+              <div class="hm-domain-behavior-head">
                 <div><strong>{escape(_trial.agent_name)}</strong><small>{escape(_trial.model_name)} &middot; {escape(_trial.name)}</small></div>
-                <div class="acto-behavior-badges">{badge(f'Reward {_trial.reward:.1f}', _reward_kind)}{badge(_record['expert_status'], _expert_kind)}</div>
+                <div class="hm-domain-behavior-badges">{badge(f'Reward {_trial.reward:.1f}', _reward_kind)}{badge(_record['expert_status'], _expert_kind)}</div>
               </div>
-              <div class="acto-profile"><label>Change actions</label><div class="acto-meter change"><span style="width:{_change_width}%"></span></div><b>{_metrics['change_actions']}</b></div>
-              <div class="acto-profile"><label>Validation</label><div class="acto-meter"><span style="width:{_validation_width}%"></span></div><b>{_metrics['validation_actions']}</b></div>
-              <div class="acto-behavior-stats">
+              <div class="hm-domain-profile"><label>Change actions</label><div class="hm-domain-meter change"><span style="width:{_change_width}%"></span></div><b>{_metrics['change_actions']}</b></div>
+              <div class="hm-domain-profile"><label>Validation</label><div class="hm-domain-meter"><span style="width:{_validation_width}%"></span></div><b>{_metrics['validation_actions']}</b></div>
+              <div class="hm-domain-behavior-stats">
                 <span><b>{_metrics['tool_calls']}</b> tool calls</span>
                 <span><b>{_metrics['observations']}</b> observations</span>
                 <span><b>{_metrics['elapsed_seconds'] / 60:.1f}m</b> elapsed</span>
@@ -735,43 +735,43 @@ def _(
         _insight = "Verifier outcomes and expert judgments align across the loaded runs."
 
     _behavior_content = (
-        f'<div class="acto-behavior-list">{"".join(_behavior_rows)}</div>'
+        f'<div class="hm-domain-behavior-list">{"".join(_behavior_rows)}</div>'
         if _behavior_rows
-        else '<div class="acto-empty">No runs match the current filters.</div>'
+        else '<div class="hm-domain-empty">No runs match the current filters.</div>'
     )
     _table_content = (
         f"""
-        <table class="acto-table">
+        <table class="hm-domain-table">
           <thead><tr><th>Run</th><th>Model</th><th>Reward</th><th>Changes</th><th>Validation</th><th>Observations</th><th>Time</th><th>Cost</th></tr></thead>
           <tbody>{''.join(_table_rows)}</tbody>
         </table>
         """
         if _table_rows
-        else '<div class="acto-empty">Broaden the filters to compare runs.</div>'
+        else '<div class="hm-domain-empty">Broaden the filters to compare runs.</div>'
     )
 
     analysis_view = mo.Html(
         f"""{component_css}
-        <div class="acto-shell">
-          <div class="acto-analysis-intro">
+        <div class="hm-domain-shell">
+          <div class="hm-domain-analysis-intro">
             <div><h2>ATIF behavior &times; Harbor outcome</h2><p>Compare how agents worked, not only whether they received a reward. Every measure below is recalculated from the loaded trajectories when you change a filter.</p></div>
             <span class="tag">Reactive Python analysis</span>
           </div>
-          <div class="acto-kpis" style="margin-top:10px">
-            <div class="acto-kpi"><div class="label">Runs shown</div><div class="value">{_shown}</div></div>
-            <div class="acto-kpi"><div class="label">Pass rate</div><div class="value">{_pass_rate}</div></div>
-            <div class="acto-kpi"><div class="label">Blind spots</div><div class="value">{_blind_spots}</div></div>
-            <div class="acto-kpi"><div class="label">Mean cost</div><div class="value">${_mean_cost:.2f}</div></div>
+          <div class="hm-domain-kpis" style="margin-top:10px">
+            <div class="hm-domain-kpi"><div class="label">Runs shown</div><div class="value">{_shown}</div></div>
+            <div class="hm-domain-kpi"><div class="label">Pass rate</div><div class="value">{_pass_rate}</div></div>
+            <div class="hm-domain-kpi"><div class="label">Blind spots</div><div class="value">{_blind_spots}</div></div>
+            <div class="hm-domain-kpi"><div class="label">Mean cost</div><div class="value">${_mean_cost:.2f}</div></div>
           </div>
-          <div class="acto-analysis-note"><strong>Live finding</strong><span>{escape(_insight)}</span></div>
-          <div class="acto-panel" style="margin-top:10px">
-            <div class="acto-panel-head"><div><h2>Behavior profiles</h2><p>Derived from tool calls, observations, timestamps, and ATIF final metrics.</p></div></div>
+          <div class="hm-domain-analysis-note"><strong>Live finding</strong><span>{escape(_insight)}</span></div>
+          <div class="hm-domain-panel" style="margin-top:10px">
+            <div class="hm-domain-panel-head"><div><h2>Behavior profiles</h2><p>Derived from tool calls, observations, timestamps, and ATIF final metrics.</p></div></div>
             {_behavior_content}
           </div>
-          <div class="acto-panel" style="margin-top:10px">
-            <div class="acto-panel-head"><div><h2>Comparable run data</h2><p>A research-ready table computed from ATIF plus Harbor verifier results.</p></div></div>
+          <div class="hm-domain-panel" style="margin-top:10px">
+            <div class="hm-domain-panel-head"><div><h2>Comparable run data</h2><p>A research-ready table computed from ATIF plus Harbor verifier results.</p></div></div>
             {_table_content}
-            <div class="acto-footnote">Change and validation counts are transparent keyword-derived signals for exploration, not additional verifier scores.</div>
+            <div class="hm-domain-footnote">Change and validation counts are transparent keyword-derived signals for exploration, not additional verifier scores.</div>
           </div>
         </div>
         """

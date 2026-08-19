@@ -738,7 +738,7 @@ dependencies = [
 ]
 
 [package.optional-dependencies]
-acto = [
+domain = [
     { name = "openpyxl" },
 ]
 plugin = [
@@ -755,9 +755,9 @@ dev = [
 requires-dist = [
     { name = "harbor", marker = "extra == 'plugin'", specifier = ">=0.20,<0.21" },
     { name = "marimo", specifier = ">=0.18,<1" },
-    { name = "openpyxl", marker = "extra == 'acto'", specifier = ">=3.1.5,<4" },
+    { name = "openpyxl", marker = "extra == 'domain'", specifier = ">=3.1.5,<4" },
 ]
-provides-extras = ["acto", "plugin"]
+provides-extras = ["domain", "plugin"]
 
 [package.metadata.requires-dev]
 dev = [
