@@ -108,16 +108,16 @@ uv run harbor run ... \
 The plugin is optional. Loading a saved Harbor job directly is the primary integration
 contract.
 
-## Acto domain example
+## Domain example
 
-The original financial-review proof of concept remains available as a domain application:
+A financial-review proof of concept remains available as a domain application:
 
 ```bash
 uv run marimo run demo.py --port 2718
 ```
 
-It adds workbook-specific review semantics on top of Harbor trials. See
-[`examples/acto-financial-review/README.md`](examples/acto-financial-review/README.md).
+It adds workbook-specific review semantics on top of Harbor trials. See the
+[domain example documentation](examples/).
 
 ## Design
 
