@@ -90,7 +90,7 @@ def _(mo, tables):
     }
     trial_picker = mo.ui.dropdown(
         options=trial_options,
-        value=next(iter(trial_options.values())),
+        value=next(iter(trial_options)),
         label="Trial",
         full_width=True,
     )
@@ -113,7 +113,7 @@ def _(mo, tables, trial_picker):
         artifact_options = {"No collected artifact": "-1"}
     artifact_picker = mo.ui.dropdown(
         options=artifact_options,
-        value=next(iter(artifact_options.values())),
+        value=next(iter(artifact_options)),
         label="Scientific artifact",
         full_width=True,
     )
@@ -139,13 +139,17 @@ def _(mo, review_store, selected_trial):
         trial_id=selected_trial["trial_id"],
         domain="science",
     )
+    decision_options = {
+        "Approve": "approve",
+        "Needs follow-up": "needs_follow_up",
+        "Reject": "reject",
+    }
+    initial_decision = prior_review.verdict.value if prior_review else "needs_follow_up"
     decision_input = mo.ui.dropdown(
-        options={
-            "Approve": "approve",
-            "Needs follow-up": "needs_follow_up",
-            "Reject": "reject",
-        },
-        value=prior_review.verdict.value if prior_review else "needs_follow_up",
+        options=decision_options,
+        value=next(
+            label for label, value in decision_options.items() if value == initial_decision
+        ),
         label="Expert verdict",
         full_width=True,
     )
