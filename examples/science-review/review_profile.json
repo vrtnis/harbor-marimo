@@ -1,0 +1,50 @@
+{
+  "title": "Bayesian Model Validation",
+  "question": "Are the reported posterior estimates supported by converged, sufficiently sampled chains?",
+  "summary": "Review the scientific evidence independently of the automated Harbor reward.",
+  "acceptance_criteria": [
+    {
+      "id": "posterior_present",
+      "label": "Posterior estimates are present and interpretable",
+      "guidance": "Confirm that every reported parameter has a mean and uncertainty estimate.",
+      "evidence_keys": ["posterior_summary.csv"]
+    },
+    {
+      "id": "chains_converged",
+      "label": "Sampling chains converged",
+      "guidance": "Check that R-hat values and the convergence report support convergence.",
+      "evidence_keys": ["posterior_summary.csv", "convergence.json"]
+    },
+    {
+      "id": "effective_sample_size",
+      "label": "Effective sample sizes are sufficient",
+      "guidance": "Review bulk effective sample size for each parameter.",
+      "evidence_keys": ["posterior_summary.csv"]
+    },
+    {
+      "id": "evidence_consistent",
+      "label": "The collected artifacts and verifier findings are consistent",
+      "guidance": "Resolve any disagreement between tabular results, reports, and verifier diagnostics."
+    }
+  ],
+  "artifact_labels": {
+    "posterior_summary.csv": {
+      "label": "Posterior summary",
+      "description": "Parameter estimates, uncertainty, convergence, and effective sample-size statistics.",
+      "guidance": "Check R-hat and effective sample size for every parameter before deciding."
+    },
+    "convergence.json": {
+      "label": "Convergence report",
+      "description": "The agent's machine-readable convergence assessment.",
+      "guidance": "Compare this claim with the values in the posterior summary."
+    }
+  },
+  "glossary": {
+    "Harbor reward": "An automated task signal. It is evidence, not a substitute for scientific judgment.",
+    "Verifier": "Automated checks applied to the agent result after execution.",
+    "Artifact": "A file collected from the agent workspace with its Harbor provenance.",
+    "R-hat": "A convergence diagnostic; values close to 1.0 generally indicate better chain agreement.",
+    "Effective sample size": "An estimate of the independent information contained in correlated samples.",
+    "Confidence": "The reviewer's confidence in the recorded expert verdict, not model confidence."
+  }
+}
