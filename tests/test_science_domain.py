@@ -8,6 +8,7 @@ from harbor_marimo.domains.science import (
     compare_trials,
     diagnostic_findings,
     preview_artifact,
+    science_glossary,
 )
 from harbor_marimo.profiles import load_review_profile
 
@@ -82,6 +83,16 @@ class ScienceDomainTests(unittest.TestCase):
         self.assertEqual(posterior.label, "Posterior summary")
         self.assertIn("R-hat", posterior.review_guidance or "")
         self.assertTrue((posterior.technical_label or "").endswith("posterior_summary.csv"))
+
+    def test_science_glossary_uses_profile_overrides(self):
+        profile = load_review_profile(
+            ROOT / "examples" / "science-review" / "review_profile.json"
+        )
+
+        glossary = science_glossary(profile)
+
+        self.assertIn("scientific judgment", glossary["Harbor reward"])
+        self.assertIn("convergence", glossary["R-hat"])
 
 
 if __name__ == "__main__":
