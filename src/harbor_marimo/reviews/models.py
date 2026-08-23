@@ -10,6 +10,7 @@ from uuid import uuid4
 
 
 SCHEMA_VERSION = "harbor-marimo/review/v2"
+LEGACY_SCHEMA_VERSIONS = frozenset({"harbor-marimo/review/v1"})
 
 
 class ReviewVerdict(str, Enum):
@@ -181,7 +182,7 @@ class ExpertReview:
     @classmethod
     def from_dict(cls, value: Mapping[str, Any]) -> "ExpertReview":
         schema = str(value.get("schema_version") or "")
-        if schema != SCHEMA_VERSION:
+        if schema != SCHEMA_VERSION and schema not in LEGACY_SCHEMA_VERSIONS:
             raise ValueError(f"Unsupported review schema: {schema or 'missing'}")
         raw_evidence = value.get("evidence") or []
         raw_criteria = value.get("criteria") or []
@@ -190,7 +191,7 @@ class ExpertReview:
         if not isinstance(raw_criteria, list):
             raise ValueError("Review criteria must be a list.")
         return cls(
-            schema_version=schema,
+            schema_version=SCHEMA_VERSION,
             review_id=str(value.get("review_id") or ""),
             job_id=str(value.get("job_id") or ""),
             trial_id=str(value.get("trial_id") or ""),

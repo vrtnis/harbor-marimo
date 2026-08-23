@@ -10,6 +10,28 @@ from harbor_marimo.reviews import (
 
 
 class ExpertReviewModelTests(unittest.TestCase):
+    def test_version_one_review_is_upgraded_when_read(self):
+        legacy = {
+            "schema_version": "harbor-marimo/review/v1",
+            "review_id": "legacy-review",
+            "job_id": "job-1",
+            "trial_id": "trial-1",
+            "domain": "science",
+            "verdict": "approve",
+            "note": "Legacy decision.",
+            "reviewer": "expert@example.com",
+            "confidence": 0.8,
+            "evidence": [],
+            "created_at": "2026-01-01T00:00:00Z",
+            "updated_at": "2026-01-01T00:00:00Z",
+        }
+
+        review = ExpertReview.from_dict(legacy)
+
+        self.assertEqual(review.schema_version, "harbor-marimo/review/v2")
+        self.assertEqual(review.criteria, ())
+        self.assertIsNone(review.follow_up)
+
     def test_review_round_trip_preserves_evidence(self):
         evidence = EvidenceReference(
             key="artifact:forecast.xlsx",
