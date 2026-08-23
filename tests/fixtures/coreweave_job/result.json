@@ -1,0 +1,15 @@
+{
+  "id": "coreweave-job",
+  "name": "Recorded CoreWeave job",
+  "started_at": "2026-08-21T12:00:00Z",
+  "finished_at": "2026-08-21T12:02:00Z",
+  "stats": {"n_completed_trials": 1, "n_errored_trials": 0},
+  "trial_results": [
+    {
+      "id": "coreweave-trial",
+      "trial_name": "science-task__coreweave",
+      "task_name": "science/remote-simulation",
+      "verifier_result": {"rewards": {"reward": 1.0}}
+    }
+  ]
+}

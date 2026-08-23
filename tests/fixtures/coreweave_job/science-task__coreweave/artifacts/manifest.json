@@ -1,0 +1,8 @@
+[
+  {
+    "source": "/logs/artifacts/result.csv",
+    "destination": "artifacts/logs/artifacts/result.csv",
+    "status": "ok",
+    "type": "file"
+  }
+]

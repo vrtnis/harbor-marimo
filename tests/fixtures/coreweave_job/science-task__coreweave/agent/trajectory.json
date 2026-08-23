@@ -1,0 +1,14 @@
+{
+  "schema_version": "ATIF-v1.7",
+  "trajectory_id": "coreweave-trajectory",
+  "steps": [
+    {
+      "step_id": 1,
+      "source": "agent",
+      "message": "Run the remote simulation and inspect its output.",
+      "tool_calls": [{"tool_call_id": "run-1", "function_name": "shell", "arguments": {"command": "python simulate.py"}}],
+      "observation": {"results": [{"source_call_id": "run-1", "content": "simulation complete"}]}
+    }
+  ],
+  "final_metrics": {"total_prompt_tokens": 500, "total_completion_tokens": 120, "total_cost_usd": 0.01}
+}
