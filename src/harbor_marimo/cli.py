@@ -46,7 +46,12 @@ def _parser() -> argparse.ArgumentParser:
         help="Open an expert review workspace for one Harbor source.",
     )
     review.add_argument("paths", nargs=1, help="Harbor job, trial, result, or ATIF path.")
-    review.add_argument("--domain", default="financial", help="Domain adapter name.")
+    review.add_argument(
+        "--domain",
+        choices=("financial", "science"),
+        default="financial",
+        help="Domain adapter name.",
+    )
     review.add_argument(
         "--review-dir",
         default="reviews",

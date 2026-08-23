@@ -21,15 +21,15 @@ not yet published to PyPI or listed as an official Harbor community integration.
 - Opens a generic Marimo workspace for comparisons and evidence inspection.
 - Provides a small Harbor plugin that prints the analysis handoff and can export tables
   after a job.
-- Keeps domain-specific applications separate. The included app is the first domain
-  example.
+- Provides financial and scientific expert-review applications with durable evidence-linked
+  sidecars.
 
 ## Quick start from this repository
 
 Python 3.12 or newer is required, matching Harbor 0.20.
 
 ```bash
-uv sync --all-extras
+uv sync --extra domain --extra plugin
 uv run harbor-marimo examples/financial-review/demo_data/harbor_job
 ```
 
@@ -132,6 +132,8 @@ It adds workbook-specific review semantics on top of Harbor trials. See the
 
 The [scientific review example](examples/science-review/README.md) demonstrates bounded
 artifact previews, convergence signals, trial comparison, and persisted expert judgments.
+See the [architecture](docs/architecture.md) and [review record](docs/expert-reviews.md)
+documentation for the extension boundaries and persistence contract.
 
 ## Design
 
@@ -146,7 +148,10 @@ normalized evidence tables + retained raw payloads
         |
         +--> Python API / JSON export
         +--> generic Marimo analysis workspace
-        +--> domain-specific Marimo applications
+        +--> financial/science domain applications
+                         |
+                         v
+                external review sidecars
 ```
 
 Artifacts are data, not trusted programs. A manifest destination that escapes its trial
@@ -156,9 +161,11 @@ verifier output, or final job results become diagnostics instead of crashing the
 ## Development
 
 ```bash
-uv sync --all-extras
+uv sync --extra domain --extra plugin
 uv run python -m unittest discover -s tests -v
-uv run marimo check src/harbor_marimo/apps/analysis.py src/harbor_marimo/apps/expert_review.py
+uv run marimo check src/harbor_marimo/apps/analysis.py \
+  src/harbor_marimo/apps/expert_review.py \
+  src/harbor_marimo/apps/science_review.py
 uv build
 ```
 
