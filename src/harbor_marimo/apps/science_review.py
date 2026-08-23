@@ -14,33 +14,49 @@ def _():
 
     from harbor_marimo import load
     from harbor_marimo.domains.science import (
+        ScienceAdapter,
         compare_trials,
         diagnostic_findings,
         preview_artifact,
+        science_glossary,
     )
+    from harbor_marimo.profiles import load_review_profile
     from harbor_marimo.reviews import (
         EvidenceReference,
         JsonReviewStore,
         record_review,
+    )
+    from harbor_marimo.ui import (
+        criteria_rows,
+        review_header_markdown,
+        review_steps_markdown,
+        technical_details_markdown,
     )
 
     return (
         EvidenceReference,
         JsonReviewStore,
         Path,
+        ScienceAdapter,
         compare_trials,
+        criteria_rows,
         diagnostic_findings,
         escape,
         json,
         load,
+        load_review_profile,
         mo,
         preview_artifact,
         record_review,
+        review_header_markdown,
+        review_steps_markdown,
+        science_glossary,
+        technical_details_markdown,
     )
 
 
 @app.cell
-def _(JsonReviewStore, Path, json, mo):
+def _(JsonReviewStore, Path, json, load_review_profile, mo):
     cli = mo.cli_args()
     raw_sources = cli.get("jobs-json")
     try:
@@ -55,6 +71,19 @@ def _(JsonReviewStore, Path, json, mo):
         / "harbor_job"
     )
     default_source = Path(cli_sources[0]) if cli_sources else demo
+    demo_profile = demo.parents[1] / "review_profile.json"
+    requested_profile = cli.get("profile")
+    profile_path = Path(requested_profile) if requested_profile else (
+        demo_profile if not cli_sources else None
+    )
+    profile_error = None
+    profile = None
+    if profile_path:
+        try:
+            profile = load_review_profile(profile_path)
+        except (OSError, ValueError, json.JSONDecodeError) as exc:
+            profile_error = str(exc)
+    guided = str(cli.get("guided") or "").lower() in {"1", "true", "yes", "on"}
     source_input = mo.ui.text(
         value=str(default_source),
         label="Harbor job, trial, result, or ATIF path",
@@ -65,7 +94,16 @@ def _(JsonReviewStore, Path, json, mo):
         cli.get("review-dir") or Path.cwd() / "reviews"
     ).expanduser().resolve()
     review_store = JsonReviewStore(review_directory)
-    return default_source, review_directory, review_store, source_input
+    return (
+        default_source,
+        guided,
+        profile,
+        profile_error,
+        profile_path,
+        review_directory,
+        review_store,
+        source_input,
+    )
 
 
 @app.cell
@@ -118,6 +156,36 @@ def _(mo, tables, trial_picker):
         full_width=True,
     )
     return artifact_picker, selected_artifacts, selected_trial
+
+
+@app.cell
+def _(
+    ScienceAdapter,
+    bundle,
+    criteria_rows,
+    guided,
+    mo,
+    profile,
+    review_header_markdown,
+    review_steps_markdown,
+    selected_trial,
+    technical_details_markdown,
+):
+    domain_view = ScienceAdapter(profile).build_view(
+        bundle, trial_id=selected_trial["trial_id"]
+    )
+    header_view = mo.md(review_header_markdown(domain_view, guided=guided))
+    steps_view = mo.callout(mo.md(review_steps_markdown(1)), kind="neutral")
+    criterion_rows = criteria_rows(domain_view.criteria)
+    criteria_view = (
+        mo.ui.table(criterion_rows, selection=None)
+        if criterion_rows
+        else mo.md("No domain-specific acceptance criteria were supplied.")
+    )
+    technical_view = mo.accordion(
+        {"Technical run details": mo.md(technical_details_markdown(selected_trial))}
+    )
+    return criteria_view, domain_view, header_view, steps_view, technical_view
 
 
 @app.cell
@@ -285,10 +353,13 @@ def _(
     artifact_picker,
     comparison_view,
     confidence_input,
+    criteria_view,
     decision_input,
     findings_view,
+    header_view,
     mo,
     note_input,
+    profile_error,
     preview_view,
     reviewer_input,
     save_button,
@@ -296,20 +367,28 @@ def _(
     selected_trial,
     source_error,
     source_input,
+    steps_view,
+    technical_view,
     trial_picker,
 ):
     error_view = (
         mo.callout(source_error, kind="danger") if source_error else mo.md("")
     )
+    profile_error_view = (
+        mo.callout(f"Review profile could not be loaded: {profile_error}", kind="warn")
+        if profile_error
+        else mo.md("")
+    )
     mo.vstack(
         [
-            mo.md(
-                f"# Scientific workflow review\n"
-                f"**{selected_trial['task_name']}** · {selected_trial['environment_provider'] or 'unknown environment'} · "
-                f"reward `{selected_trial['primary_reward']}`"
-            ),
+            header_view,
+            steps_view,
+            technical_view,
+            mo.md("## Acceptance criteria"),
+            criteria_view,
             source_input,
             error_view,
+            profile_error_view,
             mo.hstack([trial_picker, artifact_picker], widths="equal"),
             mo.md("## Collected scientific evidence"),
             preview_view,
