@@ -1,0 +1,17 @@
+{
+  "id": "science-good",
+  "trial_name": "bayes-fit__good",
+  "task_name": "science/bayesian-fit",
+  "source": "synthetic-science-review",
+  "task_checksum": "sha256:science-demo",
+  "config": {
+    "task": {"path": "tasks/bayesian-fit", "source": "synthetic-science-review"},
+    "agent": {"name": "codex", "model_name": "gpt-5.6"},
+    "environment": {"type": "docker", "docker_image": "science-demo:latest"}
+  },
+  "agent_info": {"name": "codex", "model_info": {"name": "gpt-5.6", "provider": "openai"}},
+  "verifier_result": {"rewards": {"reward": 1.0}},
+  "verifier_environment_mode": "separate",
+  "started_at": "2026-08-20T10:00:00Z",
+  "finished_at": "2026-08-20T10:04:00Z"
+}

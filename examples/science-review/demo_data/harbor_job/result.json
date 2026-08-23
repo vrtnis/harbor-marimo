@@ -1,0 +1,11 @@
+{
+  "id": "science-demo-job",
+  "name": "Bayesian model review",
+  "started_at": "2026-08-20T10:00:00Z",
+  "finished_at": "2026-08-20T10:08:00Z",
+  "stats": {"n_completed_trials": 2, "n_errored_trials": 0},
+  "trial_results": [
+    {"id": "science-good", "trial_name": "bayes-fit__good", "task_name": "science/bayesian-fit", "verifier_result": {"rewards": {"reward": 1.0}}},
+    {"id": "science-bad", "trial_name": "bayes-fit__nonconverged", "task_name": "science/bayesian-fit", "verifier_result": {"rewards": {"reward": 0.0}}}
+  ]
+}

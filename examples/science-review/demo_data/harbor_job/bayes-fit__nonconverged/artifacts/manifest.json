@@ -1,0 +1,4 @@
+[
+  {"destination": "artifacts/workspace/posterior_summary.csv", "status": "ok", "type": "file"},
+  {"destination": "artifacts/workspace/convergence.json", "status": "ok", "type": "file"}
+]

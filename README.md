@@ -127,6 +127,9 @@ uv run marimo run src/harbor_marimo/apps/expert_review.py --port 2718
 It adds workbook-specific review semantics on top of Harbor trials. See the
 [domain example documentation](examples/financial-review/README.md).
 
+The [scientific review example](examples/science-review/README.md) demonstrates bounded
+artifact previews, convergence signals, trial comparison, and persisted expert judgments.
+
 ## Design
 
 ```text

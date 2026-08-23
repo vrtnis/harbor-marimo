@@ -86,7 +86,9 @@ def normalized_argv(argv: Sequence[str]) -> list[str]:
 
 
 def marimo_command(args: argparse.Namespace) -> list[str]:
-    app_name = "expert_review.py" if args.command == "review" else "analysis.py"
+    app_name = "analysis.py"
+    if args.command == "review":
+        app_name = "science_review.py" if args.domain == "science" else "expert_review.py"
     app_path = Path(__file__).with_name("apps").joinpath(app_name).resolve()
     marimo_mode = "edit" if args.command == "edit" else "run"
     command = [sys.executable, "-m", "marimo", marimo_mode]

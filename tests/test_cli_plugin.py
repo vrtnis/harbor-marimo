@@ -63,6 +63,22 @@ class CliTests(unittest.TestCase):
         self.assertEqual(command[command.index("--domain") + 1], "financial")
         self.assertTrue(Path(command[command.index("--review-dir") + 1]).is_absolute())
 
+    def test_science_review_selects_science_app(self):
+        args = SimpleNamespace(
+            command="review",
+            paths=["job"],
+            domain="science",
+            review_dir="reviews",
+            port=None,
+            host="127.0.0.1",
+            headless=False,
+            token=None,
+        )
+
+        command = marimo_command(args)
+
+        self.assertEqual(Path(command[command.index("--") - 1]).name, "science_review.py")
+
 
 class PluginTests(unittest.TestCase):
     def test_plugin_exports_without_starting_a_server(self):

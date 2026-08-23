@@ -12,6 +12,7 @@ class PackagedAppTests(unittest.TestCase):
 
         self.assertTrue((package / "apps" / "analysis.py").is_file())
         self.assertTrue((package / "apps" / "expert_review.py").is_file())
+        self.assertTrue((package / "apps" / "science_review.py").is_file())
 
     def test_view_command_launches_packaged_analysis_app(self):
         args = SimpleNamespace(

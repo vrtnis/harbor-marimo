@@ -1,0 +1,9 @@
+{
+  "schema_version": "ATIF-v1.7",
+  "trajectory_id": "science-good-trajectory",
+  "steps": [
+    {"step_id": 1, "source": "agent", "message": "Inspect inputs", "tool_calls": [{"tool_call_id": "a", "function_name": "shell", "arguments": {"command": "python inspect_data.py"}}], "observation": {"results": [{"source_call_id": "a", "content": "240 observations"}]}},
+    {"step_id": 2, "source": "agent", "message": "Fit and validate model", "tool_calls": [{"tool_call_id": "b", "function_name": "shell", "arguments": {"command": "python fit.py && python check_convergence.py"}}], "observation": {"results": [{"source_call_id": "b", "content": "converged=true"}]}}
+  ],
+  "final_metrics": {"total_prompt_tokens": 1200, "total_completion_tokens": 400, "total_cost_usd": 0.04}
+}

@@ -3,11 +3,16 @@ from pathlib import Path
 import unittest
 
 from harbor_marimo import load
-from harbor_marimo.domains.science import compare_trials, preview_artifact
+from harbor_marimo.domains.science import (
+    compare_trials,
+    diagnostic_findings,
+    preview_artifact,
+)
 
 
 ROOT = Path(__file__).resolve().parents[1]
 JOB = ROOT / "examples" / "financial-review" / "demo_data" / "harbor_job"
+SCIENCE_JOB = ROOT / "examples" / "science-review" / "demo_data" / "harbor_job"
 
 
 class ScienceDomainTests(unittest.TestCase):
@@ -52,6 +57,14 @@ class ScienceDomainTests(unittest.TestCase):
         self.assertEqual(len(rows), 3)
         self.assertEqual([row["reward"] for row in rows], [1.0, 1.0, 0.0])
         self.assertTrue(all(row["tool_calls"] == 3 for row in rows))
+
+    def test_science_fixture_exposes_convergence_evidence(self):
+        bundle = load(SCIENCE_JOB)
+
+        findings = diagnostic_findings(bundle, trial_id="science-bad")
+
+        self.assertEqual(len(compare_trials(bundle)), 2)
+        self.assertIn("Reported convergence failure", {item.label for item in findings})
 
 
 if __name__ == "__main__":
