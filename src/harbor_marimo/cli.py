@@ -65,7 +65,7 @@ def normalized_argv(argv: Sequence[str]) -> list[str]:
 
 
 def marimo_command(args: argparse.Namespace) -> list[str]:
-    app_path = Path(__file__).with_name("app.py").resolve()
+    app_path = Path(__file__).with_name("apps").joinpath("analysis.py").resolve()
     marimo_mode = "run" if args.command == "view" else "edit"
     command = [sys.executable, "-m", "marimo", marimo_mode]
     if args.port is not None:

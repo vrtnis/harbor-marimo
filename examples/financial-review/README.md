@@ -9,12 +9,12 @@ From the repository root:
 
 ```bash
 uv sync --all-extras
-uv run marimo run examples/financial-review/app.py --port 2718
+uv run marimo run src/harbor_marimo/apps/expert_review.py --port 2718
 ```
 
-The app and fixtures live together as an install-independent example:
+The packaged expert app loads the example fixtures from this directory:
 
-- `app.py` — domain-specific Marimo application
+- `../../src/harbor_marimo/apps/expert_review.py` — domain-specific Marimo application
 - `demo_data/harbor_job/` — synthetic Harbor job with three trials
 - `scripts/build_workbooks.mjs` — deterministic workbook fixture builder
 

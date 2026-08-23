@@ -30,7 +30,7 @@ def _():
 
 @app.cell
 def _(Path, mo):
-    ROOT = Path(__file__).parent
+    ROOT = Path.cwd() / "examples" / "financial-review"
     default_source = ROOT / "demo_data" / "harbor_job"
     source_input = mo.ui.text(
         value=str(default_source),

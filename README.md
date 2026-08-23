@@ -113,7 +113,7 @@ contract.
 A financial-review proof of concept remains available as a domain application:
 
 ```bash
-uv run marimo run examples/financial-review/app.py --port 2718
+uv run marimo run src/harbor_marimo/apps/expert_review.py --port 2718
 ```
 
 It adds workbook-specific review semantics on top of Harbor trials. See the
@@ -144,7 +144,7 @@ verifier output, or final job results become diagnostics instead of crashing the
 ```bash
 uv sync --all-extras
 uv run python -m unittest discover -s tests -v
-uv run marimo check src/harbor_marimo/app.py examples/financial-review/app.py
+uv run marimo check src/harbor_marimo/apps/analysis.py src/harbor_marimo/apps/expert_review.py
 uv build
 ```
 
