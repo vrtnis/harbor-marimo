@@ -83,6 +83,7 @@ class CliTests(unittest.TestCase):
         self.assertEqual(Path(command[command.index("--") - 1]).name, "science_review.py")
         self.assertIn("--profile", command)
         self.assertIn("--guided", command)
+        self.assertEqual(command[command.index("--guided") + 1], "true")
         self.assertNotIn("--developer", command)
 
 

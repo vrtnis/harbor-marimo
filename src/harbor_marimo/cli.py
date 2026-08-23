@@ -132,9 +132,9 @@ def marimo_command(args: argparse.Namespace) -> list[str]:
         if profile:
             command.extend(["--profile", str(Path(profile).expanduser().resolve())])
         if getattr(args, "guided", False):
-            command.append("--guided")
+            command.extend(["--guided", "true"])
         if getattr(args, "developer", False):
-            command.append("--developer")
+            command.extend(["--developer", "true"])
     return command
 
 
