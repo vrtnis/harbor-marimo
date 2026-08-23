@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Protocol, runtime_checkable
 
 from ..models import AnalysisBundle, JsonObject
+from ..profiles import ReviewCriterion
 
 
 @dataclass(frozen=True)
@@ -21,6 +22,9 @@ class DomainEvidence:
     step_name: str | None = None
     path: Path | None = None
     summary: str | None = None
+    description: str | None = None
+    review_guidance: str | None = None
+    technical_label: str | None = None
     metadata: JsonObject = field(default_factory=dict)
 
 
@@ -31,6 +35,8 @@ class DomainView:
     domain: str
     title: str
     summary: str
+    question: str = ""
+    criteria: tuple[ReviewCriterion, ...] = ()
     evidence: tuple[DomainEvidence, ...] = ()
     diagnostics: tuple[str, ...] = ()
     metadata: JsonObject = field(default_factory=dict)
