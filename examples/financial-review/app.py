@@ -10,8 +10,8 @@ def _():
     from html import escape
     import marimo as mo
 
-    from domain_harbor_demo.harbor_loader import (
-        load_harbor_source,
+    from harbor_marimo.domains.financial import (
+        load_financial_source,
         trajectory_metrics,
         trajectory_rows,
         workbook_grid,
@@ -20,7 +20,7 @@ def _():
     return (
         Path,
         escape,
-        load_harbor_source,
+        load_financial_source,
         mo,
         trajectory_metrics,
         trajectory_rows,
@@ -43,14 +43,14 @@ def _(Path, mo):
 
 
 @app.cell
-def _(default_source, load_harbor_source, source_input):
+def _(default_source, load_financial_source, source_input):
     requested_source = source_input.value or str(default_source)
     source_error = None
     try:
-        loaded_source = load_harbor_source(requested_source)
+        loaded_source = load_financial_source(requested_source)
     except (FileNotFoundError, OSError, ValueError) as exc:
         source_error = str(exc)
-        loaded_source = load_harbor_source(default_source)
+        loaded_source = load_financial_source(default_source)
     job = loaded_source.job
     return job, loaded_source, requested_source, source_error
 

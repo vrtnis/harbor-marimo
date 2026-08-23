@@ -1,9 +1,9 @@
 from pathlib import Path
 import unittest
 
-from domain_harbor_demo.harbor_loader import (
-    load_harbor_job,
-    load_harbor_source,
+from harbor_marimo.domains.financial import (
+    load_financial_job,
+    load_financial_source,
     trajectory_metrics,
     trajectory_rows,
     workbook_grid,
@@ -16,7 +16,9 @@ ROOT = Path(__file__).resolve().parents[1]
 class HarborLoaderTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.job = load_harbor_job(ROOT / "examples" / "financial-review" / "demo_data" / "harbor_job")
+        cls.job = load_financial_job(
+            ROOT / "examples" / "financial-review" / "demo_data" / "harbor_job"
+        )
 
     def test_job_summary(self):
         self.assertEqual(len(self.job.trials), 3)
@@ -40,7 +42,7 @@ class HarborLoaderTests(unittest.TestCase):
         )
 
     def test_job_directory_can_be_loaded_as_a_source(self):
-        loaded = load_harbor_source(
+        loaded = load_financial_source(
             ROOT / "examples" / "financial-review" / "demo_data" / "harbor_job"
         )
 
@@ -50,7 +52,7 @@ class HarborLoaderTests(unittest.TestCase):
 
     def test_atif_path_selects_its_trial(self):
         expected = self.job.trials[1]
-        loaded = load_harbor_source(expected.directory / "agent" / "trajectory.json")
+        loaded = load_financial_source(expected.directory / "agent" / "trajectory.json")
 
         self.assertEqual(loaded.kind, "Harbor ATIF")
         self.assertEqual(loaded.selected_trial_name, expected.name)

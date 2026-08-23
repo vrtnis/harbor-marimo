@@ -1,7 +1,7 @@
 from pathlib import Path
 import unittest
 
-from domain_harbor_demo.harbor_loader import load_harbor_job, workbook_grid
+from harbor_marimo.domains.financial import load_financial_job, workbook_grid
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -10,7 +10,7 @@ ROOT = Path(__file__).resolve().parents[1]
 class FinancialDemoCharacterizationTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.job = load_harbor_job(
+        cls.job = load_financial_job(
             ROOT / "examples" / "financial-review" / "demo_data" / "harbor_job"
         )
 
