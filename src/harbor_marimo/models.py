@@ -100,6 +100,20 @@ class Trial:
         return str(value) if value is not None else None
 
     @property
+    def environment(self) -> JsonObject:
+        return _mapping(self.config.get("environment"))
+
+    @property
+    def environment_provider(self) -> str | None:
+        value = (
+            self.environment.get("type")
+            or self.environment.get("name")
+            or self.config.get("environment_type")
+            or self.result.get("environment_type")
+        )
+        return str(value) if value is not None else None
+
+    @property
     def rewards(self) -> dict[str, float | int]:
         raw = _mapping(_mapping(self.result.get("verifier_result")).get("rewards"))
         return {

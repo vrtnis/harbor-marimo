@@ -55,6 +55,13 @@ class GenericFixtureTests(unittest.TestCase):
                 if table != "rewards" or row["scope"] == "step":
                     self.assertTrue(row["step_name"])
 
+    def test_execution_environment_metadata_is_normalized(self):
+        self.assertEqual(self.tables["jobs"][0]["environment_providers"], ["docker"])
+        for trial in self.tables["trials"]:
+            self.assertEqual(trial["environment_provider"], "docker")
+            self.assertEqual(trial["verifier_environment_mode"], "separate")
+            self.assertEqual(trial["task_source"], "domain-example")
+
 
 class EdgeCaseTests(unittest.TestCase):
     def test_ambiguous_rewards_and_all_atif_results_are_preserved(self):

@@ -150,6 +150,13 @@ def normalize_jobs(jobs: tuple[HarborJob, ...]) -> dict[str, list[JsonObject]]:
     }
     for job in jobs:
         stats = _mapping(job.result.get("stats"))
+        environment_providers = sorted(
+            {
+                provider
+                for trial in job.trials
+                if (provider := trial.environment_provider) is not None
+            }
+        )
         tables["jobs"].append(
             {
                 "job_id": job.id,
@@ -164,11 +171,15 @@ def normalize_jobs(jobs: tuple[HarborJob, ...]) -> dict[str, list[JsonObject]]:
                 "output_tokens": stats.get("n_output_tokens"),
                 "cache_tokens": stats.get("n_cache_tokens"),
                 "cost_usd": stats.get("cost_usd"),
+                "environment_providers": environment_providers,
             }
         )
         for trial in job.trials:
             agent_result = _mapping(trial.result.get("agent_result"))
             trajectory_metrics = _trajectory_metrics(trial)
+            environment = trial.environment
+            resources = _mapping(environment.get("resources"))
+            task = _mapping(trial.config.get("task"))
             tables["trials"].append(
                 {
                     **_base(job, trial),
@@ -176,6 +187,24 @@ def normalize_jobs(jobs: tuple[HarborJob, ...]) -> dict[str, list[JsonObject]]:
                     "agent": trial.agent_name,
                     "model": trial.model_name,
                     "provider": trial.provider,
+                    "environment_provider": trial.environment_provider,
+                    "environment_image": environment.get("docker_image")
+                    or environment.get("image"),
+                    "environment_cpu": resources.get("cpu")
+                    or resources.get("cpu_request")
+                    or environment.get("cpu"),
+                    "environment_memory": resources.get("memory")
+                    or resources.get("memory_request")
+                    or environment.get("memory"),
+                    "environment_gpus": resources.get("gpus")
+                    if "gpus" in resources
+                    else environment.get("gpus"),
+                    "verifier_environment_mode": trial.result.get(
+                        "verifier_environment_mode"
+                    ),
+                    "task_source": task.get("source") or trial.result.get("source"),
+                    "task_path": task.get("path"),
+                    "task_checksum": trial.result.get("task_checksum"),
                     "status": trial.status,
                     "primary_reward": trial.primary_reward,
                     "reward_dimensions": len(trial.rewards),
