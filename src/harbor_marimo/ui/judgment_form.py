@@ -12,6 +12,7 @@ def validate_review_submission(
     rationale: str,
     follow_up: str,
     criteria: Mapping[str, str],
+    evidence_count: int = 0,
 ) -> tuple[str, ...]:
     errors: list[str] = []
     if not reviewer.strip():
@@ -23,4 +24,6 @@ def validate_review_submission(
     missing = [label for label, status in criteria.items() if not status]
     if missing:
         errors.append("Assess every acceptance criterion before saving.")
+    if evidence_count < 1:
+        errors.append("Select at least one item of evidence supporting the judgment.")
     return tuple(errors)

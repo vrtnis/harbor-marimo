@@ -23,7 +23,7 @@ class ExpertUiTests(unittest.TestCase):
             criteria={"Convergence": ""},
         )
 
-        self.assertEqual(len(errors), 4)
+        self.assertEqual(len(errors), 5)
 
 
 if __name__ == "__main__":

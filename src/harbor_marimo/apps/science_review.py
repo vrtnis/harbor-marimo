@@ -22,6 +22,8 @@ def _():
     )
     from harbor_marimo.profiles import load_review_profile
     from harbor_marimo.reviews import (
+        CriterionAssessment,
+        CriterionStatus,
         EvidenceReference,
         JsonReviewStore,
         record_review,
@@ -35,9 +37,12 @@ def _():
         review_steps_markdown,
         technical_details_markdown,
         trial_options as build_trial_options,
+        validate_review_submission,
     )
 
     return (
+        CriterionAssessment,
+        CriterionStatus,
         EvidenceReference,
         JsonReviewStore,
         Path,
@@ -60,6 +65,7 @@ def _():
         science_glossary,
         technical_details_markdown,
         build_trial_options,
+        validate_review_submission,
     )
 
 
@@ -242,7 +248,7 @@ def _(
 
 
 @app.cell
-def _(mo, review_store, selected_trial):
+def _(domain_view, mo, review_store, selected_trial):
     prior_review = review_store.latest(
         job_id=selected_trial["job_id"],
         trial_id=selected_trial["trial_id"],
@@ -262,11 +268,46 @@ def _(mo, review_store, selected_trial):
         label="Expert verdict",
         full_width=True,
     )
+    _prior_assessments = {
+        item.criterion_id: item.status.value
+        for item in (prior_review.criteria if prior_review else ())
+    }
+    _status_options = {
+        "Satisfied": "satisfied",
+        "Uncertain": "uncertain",
+        "Not satisfied": "not_satisfied",
+    }
+    criterion_inputs = {}
+    for _criterion in domain_view.criteria:
+        _initial_status = _prior_assessments.get(_criterion.id, "uncertain")
+        _initial_label = next(
+            _label
+            for _label, _value in _status_options.items()
+            if _value == _initial_status
+        )
+        criterion_inputs[_criterion.id] = mo.ui.dropdown(
+            options=_status_options,
+            value=_initial_label,
+            label=_criterion.label,
+            full_width=True,
+        )
+    criterion_assessment_view = (
+        mo.vstack(list(criterion_inputs.values()), gap=0.5)
+        if criterion_inputs
+        else mo.md("No structured criteria were supplied for this review.")
+    )
     note_input = mo.ui.text_area(
         value=prior_review.note if prior_review else "",
         label="Scientific rationale",
         placeholder="Reference convergence, validity, artifacts, or follow-up work.",
         rows=5,
+        full_width=True,
+    )
+    follow_up_input = mo.ui.text_area(
+        value=(prior_review.follow_up or "") if prior_review else "",
+        label="Required follow-up",
+        placeholder="Describe the additional evidence, correction, or rerun required.",
+        rows=3,
         full_width=True,
     )
     reviewer_input = mo.ui.text(
@@ -286,16 +327,29 @@ def _(mo, review_store, selected_trial):
         show_value=True,
     )
     save_button = mo.ui.run_button(label="Save scientific review")
-    return confidence_input, decision_input, note_input, reviewer_input, save_button
+    return (
+        confidence_input,
+        criterion_assessment_view,
+        criterion_inputs,
+        decision_input,
+        follow_up_input,
+        note_input,
+        reviewer_input,
+        save_button,
+    )
 
 
 @app.cell
 def _(
+    CriterionAssessment,
+    CriterionStatus,
     EvidenceReference,
     confidence_input,
+    criterion_inputs,
     decision_input,
     domain_view,
     evidence_citation_input,
+    follow_up_input,
     mo,
     note_input,
     record_review,
@@ -304,39 +358,67 @@ def _(
     reviewer_input,
     save_button,
     selected_trial,
+    validate_review_submission,
 ):
     save_status = mo.md(f"Sidecar destination: `{review_directory}`")
     if save_button.value:
-        cited_keys = set(evidence_citation_input.value)
-        evidence = tuple(
+        _cited_keys = set(evidence_citation_input.value)
+        _criterion_values = {
+            _criterion.label: criterion_inputs[_criterion.id].value
+            for _criterion in domain_view.criteria
+        }
+        _validation_errors = validate_review_submission(
+            verdict=decision_input.value,
+            reviewer=reviewer_input.value,
+            rationale=note_input.value,
+            follow_up=follow_up_input.value,
+            criteria=_criterion_values,
+            evidence_count=len(_cited_keys),
+        )
+        if _validation_errors:
+            save_status = mo.callout(
+                mo.md("**Review not saved**\n\n" + "\n".join(f"- {_error}" for _error in _validation_errors)),
+                kind="danger",
+            )
+        else:
+            _evidence = tuple(
                 EvidenceReference(
-                    key=item.key,
-                    kind=item.kind,
+                    key=_item.key,
+                    kind=_item.kind,
                     job_id=selected_trial["job_id"],
                     trial_id=selected_trial["trial_id"],
-                    step_name=item.step_name,
-                    label=item.label,
-                    path=str(item.path) if item.path else None,
-                    locator=item.technical_label,
+                    step_name=_item.step_name,
+                    label=_item.label,
+                    path=str(_item.path) if _item.path else None,
+                    locator=_item.technical_label,
                 )
-                for item in domain_view.evidence
-                if item.key in cited_keys
+                for _item in domain_view.evidence
+                if _item.key in _cited_keys
             )
-        review, destination = record_review(
-            review_store,
-            job_id=selected_trial["job_id"],
-            trial_id=selected_trial["trial_id"],
-            domain="science",
-            verdict=decision_input.value,
-            note=note_input.value.strip(),
-            reviewer=reviewer_input.value.strip() or None,
-            confidence=confidence_input.value / 100,
-            evidence=evidence,
-        )
-        save_status = mo.callout(
-            mo.md(f"Saved `{review.verdict.value}` to `{destination}`."),
-            kind="success",
-        )
+            _assessments = tuple(
+                CriterionAssessment(
+                    criterion_id=_criterion.id,
+                    status=CriterionStatus(criterion_inputs[_criterion.id].value),
+                )
+                for _criterion in domain_view.criteria
+            )
+            review, destination = record_review(
+                review_store,
+                job_id=selected_trial["job_id"],
+                trial_id=selected_trial["trial_id"],
+                domain="science",
+                verdict=decision_input.value,
+                note=note_input.value.strip(),
+                reviewer=reviewer_input.value.strip() or None,
+                confidence=confidence_input.value / 100,
+                evidence=_evidence,
+                criteria=_assessments,
+                follow_up=follow_up_input.value.strip() or None,
+            )
+            save_status = mo.callout(
+                mo.md(f"Saved `{review.verdict.value}` to `{destination}`."),
+                kind="success",
+            )
     return (save_status,)
 
 
@@ -406,12 +488,14 @@ def _(
     artifact_picker,
     comparison_view,
     confidence_input,
+    criterion_assessment_view,
     criteria_view,
     developer,
     decision_input,
     evidence_citation_input,
     evidence_context_view,
     findings_view,
+    follow_up_input,
     header_view,
     mo,
     note_input,
@@ -459,9 +543,12 @@ def _(
             mo.md("## Compare trials"),
             comparison_view,
             mo.md("## Domain-expert judgment"),
+            mo.md("Assess each acceptance criterion before choosing an overall verdict."),
+            criterion_assessment_view,
             evidence_citation_input,
             decision_input,
             note_input,
+            follow_up_input,
             reviewer_input,
             confidence_input,
             save_button,
