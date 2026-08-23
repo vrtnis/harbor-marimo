@@ -1,6 +1,7 @@
 """Durable expert judgments linked to immutable Harbor evidence."""
 
 from .models import EvidenceReference, ExpertReview, ReviewVerdict
+from .service import record_review
 from .store import JsonReviewStore
 
 __all__ = [
@@ -8,4 +9,5 @@ __all__ = [
     "ExpertReview",
     "JsonReviewStore",
     "ReviewVerdict",
+    "record_review",
 ]

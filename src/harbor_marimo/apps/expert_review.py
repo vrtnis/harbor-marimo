@@ -16,16 +16,33 @@ def _():
         trajectory_rows,
         workbook_grid,
     )
+    from harbor_marimo.reviews import (
+        EvidenceReference,
+        JsonReviewStore,
+        ReviewVerdict,
+        record_review,
+    )
 
     return (
+        EvidenceReference,
+        JsonReviewStore,
         Path,
+        ReviewVerdict,
         escape,
         load_financial_source,
         mo,
+        record_review,
         trajectory_metrics,
         trajectory_rows,
         workbook_grid,
     )
+
+
+@app.cell
+def _(JsonReviewStore, Path):
+    review_directory = Path.cwd() / "reviews"
+    review_store = JsonReviewStore(review_directory)
+    return review_directory, review_store
 
 
 @app.cell
@@ -302,16 +319,28 @@ def _(job, trial_picker):
 
 
 @app.cell
-def _(mo, trajectory_rows, trial):
+def _(job, mo, review_store, trajectory_rows, trial):
+    prior_review = review_store.latest(
+        job_id=job.id,
+        trial_id=trial.id,
+        domain="financial",
+    )
     existing_status = trial.context.get("expert_status", "Needs review")
-    default_decision = {
-        "Approved": "Approve",
-        "Looks good": "Approve",
+    contextual_decision = {
+        "Approved": "Approved",
+        "Looks good": "Approved",
         "Needs review": "Needs review",
-        "Rejected": "Reject",
-    }.get(
-        existing_status,
-        "Approve" if existing_status == "Aligned" and trial.reward == 1.0 else "Reject",
+        "Rejected": "Rejected",
+        "Aligned": "Approved" if trial.reward == 1.0 else "Rejected",
+    }.get(existing_status, "Needs review")
+    default_decision = (
+        {
+            "approve": "Approved",
+            "reject": "Rejected",
+            "needs_follow_up": "Needs review",
+        }[prior_review.verdict.value]
+        if prior_review
+        else contextual_decision
     )
     decision_input = mo.ui.dropdown(
         options={
@@ -325,10 +354,32 @@ def _(mo, trajectory_rows, trial):
     )
     note_input = mo.ui.text_area(
         placeholder="Record the issue, evidence, or follow-up an expert should know…",
+        value=prior_review.note if prior_review else "",
         rows=4,
         label="Review note",
         full_width=True,
     )
+    reviewer_value = prior_review.reviewer or "" if prior_review else ""
+    reviewer_input = mo.ui.text(
+        value=reviewer_value,
+        placeholder="name or email",
+        label="Reviewer",
+        full_width=True,
+    )
+    confidence_value = (
+        prior_review.confidence
+        if prior_review and prior_review.confidence is not None
+        else 0.8
+    )
+    confidence_input = mo.ui.slider(
+        start=0,
+        stop=100,
+        step=5,
+        value=int(confidence_value * 100),
+        label="Confidence",
+        show_value=True,
+    )
+    save_button = mo.ui.run_button(label="Save expert review")
     trace_rows = trajectory_rows(trial.trajectory)
     trace_options = {}
     for _trace_item in trace_rows:
@@ -343,7 +394,15 @@ def _(mo, trajectory_rows, trial):
         label="Inspect event",
         full_width=True,
     )
-    return decision_input, note_input, trace_rows, trajectory_step_picker
+    return (
+        confidence_input,
+        decision_input,
+        note_input,
+        reviewer_input,
+        save_button,
+        trace_rows,
+        trajectory_step_picker,
+    )
 
 
 @app.cell
@@ -490,7 +549,18 @@ def _(
 
 
 @app.cell
-def _(badge, component_css, decision_input, escape, mo, note_input, trial):
+def _(
+    badge,
+    component_css,
+    confidence_input,
+    decision_input,
+    escape,
+    mo,
+    note_input,
+    reviewer_input,
+    save_button,
+    trial,
+):
     _prior_status = trial.context.get("expert_status", "Not reviewed")
     _prior_kind = "review" if _prior_status == "Needs review" else "pass"
     review_heading = mo.Html(
@@ -514,15 +584,81 @@ def _(badge, component_css, decision_input, escape, mo, note_input, trial):
         f'{component_css}<div class="hm-domain-shell hm-domain-receipt"><strong>Current decision: {_current_decision}</strong>{_current_detail}<br><span>Changes are reflected immediately in the run trace.</span></div>'
     )
     review_panel = mo.vstack(
-        [review_heading, decision_input, note_input, review_receipt], gap=0.55
+        [
+            review_heading,
+            decision_input,
+            note_input,
+            reviewer_input,
+            confidence_input,
+            save_button,
+            review_receipt,
+        ],
+        gap=0.55,
     )
     return (review_panel,)
 
 
 @app.cell
-def _(artifact_panel, mo, review_panel, verifier_panel):
+def _(
+    EvidenceReference,
+    ReviewVerdict,
+    confidence_input,
+    decision_input,
+    job,
+    mo,
+    note_input,
+    record_review,
+    review_directory,
+    review_store,
+    reviewer_input,
+    save_button,
+    trial,
+):
+    save_status = mo.md(
+        f"Reviews are stored outside Harbor results in `{review_directory}`."
+    )
+    if save_button.value:
+        verdict = {
+            "Approved": ReviewVerdict.APPROVE,
+            "Rejected": ReviewVerdict.REJECT,
+            "Needs review": ReviewVerdict.NEEDS_FOLLOW_UP,
+        }[decision_input.value]
+        evidence = []
+        if trial.artifact_path:
+            evidence.append(
+                EvidenceReference(
+                    key=f"artifact:{trial.artifact_path.name}",
+                    kind="artifact",
+                    job_id=job.id,
+                    trial_id=trial.id,
+                    label=trial.context.get("artifact_kind", "Work product"),
+                    path=str(trial.artifact_path),
+                    locator=trial.context.get("focus_cell"),
+                )
+            )
+        review, destination = record_review(
+            review_store,
+            job_id=job.id,
+            trial_id=trial.id,
+            domain="financial",
+            verdict=verdict,
+            note=note_input.value.strip(),
+            reviewer=reviewer_input.value.strip() or None,
+            confidence=confidence_input.value / 100,
+            evidence=evidence,
+        )
+        save_status = mo.callout(
+            mo.md(f"Saved `{review.verdict.value}` to `{destination}`."),
+            kind="success",
+        )
+    return (save_status,)
+
+
+@app.cell
+def _(artifact_panel, mo, review_panel, save_status, verifier_panel):
+    review_column = mo.vstack([review_panel, save_status], gap=0.5)
     review_decision_row = mo.hstack(
-        [verifier_panel, review_panel],
+        [verifier_panel, review_column],
         widths=[0.38, 0.62],
         align="start",
         wrap=True,
