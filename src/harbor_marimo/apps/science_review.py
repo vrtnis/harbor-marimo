@@ -84,6 +84,7 @@ def _(JsonReviewStore, Path, json, load_review_profile, mo):
         except (OSError, ValueError, json.JSONDecodeError) as exc:
             profile_error = str(exc)
     guided = str(cli.get("guided") or "").lower() in {"1", "true", "yes", "on"}
+    developer = str(cli.get("developer") or "").lower() in {"1", "true", "yes", "on"}
     source_input = mo.ui.text(
         value=str(default_source),
         label="Harbor job, trial, result, or ATIF path",
@@ -96,6 +97,7 @@ def _(JsonReviewStore, Path, json, load_review_profile, mo):
     review_store = JsonReviewStore(review_directory)
     return (
         default_source,
+        developer,
         guided,
         profile,
         profile_error,
@@ -354,6 +356,7 @@ def _(
     comparison_view,
     confidence_input,
     criteria_view,
+    developer,
     decision_input,
     findings_view,
     header_view,
@@ -379,6 +382,11 @@ def _(
         if profile_error
         else mo.md("")
     )
+    source_control_view = (
+        mo.vstack([mo.md("### Developer source control"), source_input])
+        if developer
+        else mo.md("")
+    )
     mo.vstack(
         [
             header_view,
@@ -386,7 +394,7 @@ def _(
             technical_view,
             mo.md("## Acceptance criteria"),
             criteria_view,
-            source_input,
+            source_control_view,
             error_view,
             profile_error_view,
             mo.hstack([trial_picker, artifact_picker], widths="equal"),
