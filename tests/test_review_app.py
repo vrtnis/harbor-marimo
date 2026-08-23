@@ -1,7 +1,13 @@
 import tempfile
 import unittest
 
-from harbor_marimo.reviews import EvidenceReference, JsonReviewStore, record_review
+from harbor_marimo.reviews import (
+    CriterionAssessment,
+    CriterionStatus,
+    EvidenceReference,
+    JsonReviewStore,
+    record_review,
+)
 
 
 class ReviewApplicationServiceTests(unittest.TestCase):
@@ -32,11 +38,20 @@ class ReviewApplicationServiceTests(unittest.TestCase):
                 note="Diagnostics now converge.",
                 confidence=0.95,
                 evidence=[reference],
+                criteria=[
+                    CriterionAssessment(
+                        criterion_id="convergence",
+                        status=CriterionStatus.SATISFIED,
+                    )
+                ],
+                follow_up="Archive the validated result.",
             )
 
             self.assertEqual(updated.review_id, first.review_id)
             self.assertEqual(updated.created_at, first.created_at)
             self.assertEqual(updated.verdict.value, "approve")
+            self.assertEqual(updated.criteria[0].criterion_id, "convergence")
+            self.assertIn("Archive", updated.follow_up or "")
             self.assertTrue(destination.endswith(".json"))
 
 
