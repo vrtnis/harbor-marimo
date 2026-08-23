@@ -7,5 +7,12 @@ verifier diagnostics. It is an interface fixture, not a Terminal-Bench Science t
 ```bash
 uv run harbor-marimo review examples/science-review/demo_data/harbor_job \
   --domain science \
+  --profile examples/science-review/review_profile.json \
+  --guided \
   --review-dir outputs/science-reviews
 ```
+
+The profile is separate from the synthetic Harbor job. It supplies expert-facing copy and
+criteria while the loader continues to consume standard Harbor output. Remove `--guided`
+for the normal review experience, or add `--developer` to expose local source and sidecar
+paths while debugging.

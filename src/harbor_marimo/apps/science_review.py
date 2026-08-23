@@ -33,6 +33,7 @@ def _():
         evidence_markdown,
         evidence_options,
         expert_comparison_rows,
+        glossary_markdown,
         review_header_markdown,
         review_steps_markdown,
         technical_details_markdown,
@@ -54,6 +55,7 @@ def _():
         evidence_options,
         expert_comparison_rows,
         escape,
+        glossary_markdown,
         json,
         load,
         load_review_profile,
@@ -137,11 +139,11 @@ def _(default_source, load, source_input):
 @app.cell
 def _(build_trial_options, mo, tables):
     trial_options = build_trial_options(tables["trials"])
-    trial_picker = mo.ui.dropdown(
+    trial_picker = mo.ui.radio(
         options=trial_options,
         value=next(iter(trial_options)),
-        label="Trial",
-        full_width=True,
+        label="Review attempt",
+        inline=True,
     )
     return (trial_picker,)
 
@@ -184,10 +186,12 @@ def _(
     criteria_rows,
     evidence_options,
     guided,
+    glossary_markdown,
     mo,
     profile,
     review_header_markdown,
     review_steps_markdown,
+    science_glossary,
     selected_trial,
     technical_details_markdown,
 ):
@@ -205,6 +209,24 @@ def _(
     technical_view = mo.accordion(
         {"Technical run details": mo.md(technical_details_markdown(selected_trial))}
     )
+    glossary_view = mo.accordion(
+        {
+            "Terms used in this review": mo.md(
+                glossary_markdown(science_glossary(profile))
+            )
+        }
+    )
+    onboarding_view = (
+        mo.callout(
+            mo.md(
+                "This is a guided training review. Work from the scientific question "
+                "to the evidence, compare attempts, then record your independent judgment."
+            ),
+            kind="info",
+        )
+        if guided
+        else mo.md("")
+    )
     evidence_citation_input = mo.ui.multiselect(
         options=evidence_options(domain_view.evidence),
         label="Evidence supporting this judgment",
@@ -214,7 +236,9 @@ def _(
         criteria_view,
         domain_view,
         evidence_citation_input,
+        glossary_view,
         header_view,
+        onboarding_view,
         steps_view,
         technical_view,
     )
@@ -347,6 +371,7 @@ def _(
     confidence_input,
     criterion_inputs,
     decision_input,
+    developer,
     domain_view,
     evidence_citation_input,
     follow_up_input,
@@ -360,7 +385,11 @@ def _(
     selected_trial,
     validate_review_submission,
 ):
-    save_status = mo.md(f"Sidecar destination: `{review_directory}`")
+    save_status = (
+        mo.md(f"Developer sidecar destination: `{review_directory}`")
+        if developer
+        else mo.md("Complete the assessment, cite evidence, and save your judgment.")
+    )
     if save_button.value:
         _cited_keys = set(evidence_citation_input.value)
         _criterion_values = {
@@ -415,8 +444,18 @@ def _(
                 criteria=_assessments,
                 follow_up=follow_up_input.value.strip() or None,
             )
+            _developer_destination = (
+                f"\n\nDeveloper destination: `{destination}`" if developer else ""
+            )
             save_status = mo.callout(
-                mo.md(f"Saved `{review.verdict.value}` to `{destination}`."),
+                mo.md(
+                    f"**Review saved**\n\n"
+                    f"Verdict: `{review.verdict.value}`  \n"
+                    f"Review: `{review.review_id}`  \n"
+                    f"Updated: `{review.updated_at}`\n\n"
+                    "The original Harbor run was not modified."
+                    f"{_developer_destination}"
+                ),
                 kind="success",
             )
     return (save_status,)
@@ -496,9 +535,11 @@ def _(
     evidence_context_view,
     findings_view,
     follow_up_input,
+    glossary_view,
     header_view,
     mo,
     note_input,
+    onboarding_view,
     profile_error,
     preview_view,
     reviewer_input,
@@ -527,10 +568,12 @@ def _(
     mo.vstack(
         [
             header_view,
+            onboarding_view,
             steps_view,
             technical_view,
             mo.md("## Acceptance criteria"),
             criteria_view,
+            glossary_view,
             source_control_view,
             error_view,
             profile_error_view,

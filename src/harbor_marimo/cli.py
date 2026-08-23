@@ -57,6 +57,21 @@ def _parser() -> argparse.ArgumentParser:
         default="reviews",
         help="Sidecar directory for persisted expert reviews.",
     )
+    review.add_argument(
+        "--profile",
+        default=None,
+        help="Optional JSON profile with expert-facing question, criteria, and labels.",
+    )
+    review.add_argument(
+        "--guided",
+        action="store_true",
+        help="Show facilitated onboarding guidance and a training banner.",
+    )
+    review.add_argument(
+        "--developer",
+        action="store_true",
+        help="Expose source and persistence paths for local debugging.",
+    )
     review.add_argument("--port", type=int, default=None)
     review.add_argument("--host", default="127.0.0.1")
     review.add_argument("--headless", action="store_true")
@@ -113,6 +128,13 @@ def marimo_command(args: argparse.Namespace) -> list[str]:
         command.extend(["--domain", args.domain])
         review_dir = str(Path(args.review_dir).expanduser().resolve())
         command.extend(["--review-dir", review_dir])
+        profile = getattr(args, "profile", None)
+        if profile:
+            command.extend(["--profile", str(Path(profile).expanduser().resolve())])
+        if getattr(args, "guided", False):
+            command.append("--guided")
+        if getattr(args, "developer", False):
+            command.append("--developer")
     return command
 
 

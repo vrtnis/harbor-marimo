@@ -73,11 +73,17 @@ class CliTests(unittest.TestCase):
             host="127.0.0.1",
             headless=False,
             token=None,
+            profile="examples/science-review/review_profile.json",
+            guided=True,
+            developer=False,
         )
 
         command = marimo_command(args)
 
         self.assertEqual(Path(command[command.index("--") - 1]).name, "science_review.py")
+        self.assertIn("--profile", command)
+        self.assertIn("--guided", command)
+        self.assertNotIn("--developer", command)
 
 
 class PluginTests(unittest.TestCase):
