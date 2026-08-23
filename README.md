@@ -52,6 +52,14 @@ Export normalized evidence for another analysis system:
 uv run harbor-marimo export examples/financial-review/demo_data/harbor_job -o outputs/analysis.json
 ```
 
+Open the expert workflow and persist judgments as sidecars:
+
+```bash
+uv run harbor-marimo review examples/financial-review/demo_data/harbor_job \
+  --domain financial \
+  --review-dir outputs/reviews
+```
+
 Add `--include-raw` only when the downstream consumer needs complete original payloads.
 Exports retain source provenance and can contain absolute local paths. Keep local exports
 under the ignored `outputs/` directory unless they have been reviewed and sanitized for

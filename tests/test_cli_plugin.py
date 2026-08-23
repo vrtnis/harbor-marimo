@@ -22,6 +22,12 @@ class CliTests(unittest.TestCase):
         self.assertEqual(normalized_argv(["export", "a/job"]), ["export", "a/job"])
         self.assertEqual(normalized_argv(["--version"]), ["--version"])
 
+    def test_review_is_an_explicit_command(self):
+        self.assertEqual(
+            normalized_argv(["review", "a/job", "--domain", "science"]),
+            ["review", "a/job", "--domain", "science"],
+        )
+
     def test_marimo_command_passes_sources_as_json(self):
         args = SimpleNamespace(
             command="view",
@@ -38,6 +44,24 @@ class CliTests(unittest.TestCase):
         self.assertIn("--no-token", command)
         payload = json.loads(command[command.index("--jobs-json") + 1])
         self.assertEqual([Path(value).name for value in payload], ["first", "second"])
+
+    def test_review_command_selects_expert_app_and_sidecar_directory(self):
+        args = SimpleNamespace(
+            command="review",
+            paths=["job"],
+            domain="financial",
+            review_dir="reviews",
+            port=None,
+            host="127.0.0.1",
+            headless=False,
+            token=None,
+        )
+
+        command = marimo_command(args)
+
+        self.assertEqual(Path(command[command.index("--") - 1]).name, "expert_review.py")
+        self.assertEqual(command[command.index("--domain") + 1], "financial")
+        self.assertTrue(Path(command[command.index("--review-dir") + 1]).is_absolute())
 
 
 class PluginTests(unittest.TestCase):

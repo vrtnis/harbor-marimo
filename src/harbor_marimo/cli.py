@@ -14,7 +14,7 @@ from .export import export_json
 from .loader import load
 
 
-_COMMANDS = {"view", "edit", "export"}
+_COMMANDS = {"view", "edit", "export", "review"}
 
 
 def _parser() -> argparse.ArgumentParser:
@@ -41,6 +41,27 @@ def _parser() -> argparse.ArgumentParser:
             help="Enable or disable Marimo session authentication.",
         )
 
+    review = subparsers.add_parser(
+        "review",
+        help="Open an expert review workspace for one Harbor source.",
+    )
+    review.add_argument("paths", nargs=1, help="Harbor job, trial, result, or ATIF path.")
+    review.add_argument("--domain", default="financial", help="Domain adapter name.")
+    review.add_argument(
+        "--review-dir",
+        default="reviews",
+        help="Sidecar directory for persisted expert reviews.",
+    )
+    review.add_argument("--port", type=int, default=None)
+    review.add_argument("--host", default="127.0.0.1")
+    review.add_argument("--headless", action="store_true")
+    review.add_argument(
+        "--token",
+        action=argparse.BooleanOptionalAction,
+        default=None,
+        help="Enable or disable Marimo session authentication.",
+    )
+
     export = subparsers.add_parser("export", help="Export normalized evidence tables as JSON.")
     export.add_argument("paths", nargs="+", help="Harbor job, trial, result, or ATIF paths.")
     export.add_argument("-o", "--output", required=True, help="Destination JSON path.")
@@ -65,8 +86,9 @@ def normalized_argv(argv: Sequence[str]) -> list[str]:
 
 
 def marimo_command(args: argparse.Namespace) -> list[str]:
-    app_path = Path(__file__).with_name("apps").joinpath("analysis.py").resolve()
-    marimo_mode = "run" if args.command == "view" else "edit"
+    app_name = "expert_review.py" if args.command == "review" else "analysis.py"
+    app_path = Path(__file__).with_name("apps").joinpath(app_name).resolve()
+    marimo_mode = "edit" if args.command == "edit" else "run"
     command = [sys.executable, "-m", "marimo", marimo_mode]
     if args.port is not None:
         command.extend(["--port", str(args.port)])
@@ -80,6 +102,10 @@ def marimo_command(args: argparse.Namespace) -> list[str]:
         command.append("--no-token")
     sources = [str(Path(value).expanduser().resolve()) for value in args.paths]
     command.extend([str(app_path), "--", "--jobs-json", json.dumps(sources)])
+    if args.command == "review":
+        command.extend(["--domain", args.domain])
+        review_dir = str(Path(args.review_dir).expanduser().resolve())
+        command.extend(["--review-dir", review_dir])
     return command
 
 

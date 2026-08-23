@@ -8,6 +8,7 @@ app = marimo.App(width="full")
 def _():
     from pathlib import Path
     from html import escape
+    import json
     import marimo as mo
 
     from harbor_marimo.domains.financial import (
@@ -29,6 +30,7 @@ def _():
         Path,
         ReviewVerdict,
         escape,
+        json,
         load_financial_source,
         mo,
         record_review,
@@ -39,16 +41,25 @@ def _():
 
 
 @app.cell
-def _(JsonReviewStore, Path):
-    review_directory = Path.cwd() / "reviews"
+def _(JsonReviewStore, Path, mo):
+    review_directory = Path(
+        mo.cli_args().get("review-dir") or Path.cwd() / "reviews"
+    ).expanduser().resolve()
+    review_domain = mo.cli_args().get("domain") or "financial"
     review_store = JsonReviewStore(review_directory)
-    return review_directory, review_store
+    return review_directory, review_domain, review_store
 
 
 @app.cell
-def _(Path, mo):
+def _(Path, json, mo):
     ROOT = Path.cwd() / "examples" / "financial-review"
-    default_source = ROOT / "demo_data" / "harbor_job"
+    _raw_sources = mo.cli_args().get("jobs-json")
+    try:
+        _cli_sources = json.loads(_raw_sources) if _raw_sources else []
+    except (TypeError, json.JSONDecodeError):
+        _cli_sources = []
+    _demo_source = ROOT / "demo_data" / "harbor_job"
+    default_source = Path(_cli_sources[0]) if _cli_sources else _demo_source
     source_input = mo.ui.text(
         value=str(default_source),
         placeholder=r"C:\path\to\jobs\job-name or ...\agent\trajectory.json",
@@ -319,11 +330,11 @@ def _(job, trial_picker):
 
 
 @app.cell
-def _(job, mo, review_store, trajectory_rows, trial):
+def _(job, mo, review_domain, review_store, trajectory_rows, trial):
     prior_review = review_store.latest(
         job_id=job.id,
         trial_id=trial.id,
-        domain="financial",
+        domain=review_domain,
     )
     existing_status = trial.context.get("expert_status", "Needs review")
     contextual_decision = {
@@ -609,6 +620,7 @@ def _(
     note_input,
     record_review,
     review_directory,
+    review_domain,
     review_store,
     reviewer_input,
     save_button,
@@ -640,7 +652,7 @@ def _(
             review_store,
             job_id=job.id,
             trial_id=trial.id,
-            domain="financial",
+            domain=review_domain,
             verdict=verdict,
             note=note_input.value.strip(),
             reviewer=reviewer_input.value.strip() or None,
