@@ -19,7 +19,9 @@ def write_json(path: Path, value) -> None:
 class GenericFixtureTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.bundle = load(ROOT / "demo_data" / "harbor_job")
+        cls.bundle = load(
+            ROOT / "examples" / "financial-review" / "demo_data" / "harbor_job"
+        )
         cls.tables = cls.bundle.tables()
 
     def test_normalizes_complete_job(self):
@@ -32,9 +34,16 @@ class GenericFixtureTests(unittest.TestCase):
 
     def test_atif_path_resolves_and_deduplicates_job(self):
         trajectory = next(
-            (ROOT / "demo_data" / "harbor_job").glob("*/agent/trajectory.json")
+            (
+                ROOT / "examples" / "financial-review" / "demo_data" / "harbor_job"
+            ).glob("*/agent/trajectory.json")
         )
-        bundle = load([ROOT / "demo_data" / "harbor_job", trajectory])
+        bundle = load(
+            [
+                ROOT / "examples" / "financial-review" / "demo_data" / "harbor_job",
+                trajectory,
+            ]
+        )
         self.assertEqual(len(bundle.jobs), 1)
         self.assertEqual(len(bundle.requested_paths), 2)
 

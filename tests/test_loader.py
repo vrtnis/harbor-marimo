@@ -16,7 +16,7 @@ ROOT = Path(__file__).resolve().parents[1]
 class HarborLoaderTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.job = load_harbor_job(ROOT / "demo_data" / "harbor_job")
+        cls.job = load_harbor_job(ROOT / "examples" / "financial-review" / "demo_data" / "harbor_job")
 
     def test_job_summary(self):
         self.assertEqual(len(self.job.trials), 3)
@@ -40,7 +40,9 @@ class HarborLoaderTests(unittest.TestCase):
         )
 
     def test_job_directory_can_be_loaded_as_a_source(self):
-        loaded = load_harbor_source(ROOT / "demo_data" / "harbor_job")
+        loaded = load_harbor_source(
+            ROOT / "examples" / "financial-review" / "demo_data" / "harbor_job"
+        )
 
         self.assertEqual(loaded.kind, "Harbor job")
         self.assertIsNone(loaded.selected_trial_name)

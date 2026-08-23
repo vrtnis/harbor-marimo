@@ -9,7 +9,7 @@
   "config": {
     "task": {"path": "tasks/forecast-update-001", "source": "domain-example"},
     "trial_name": "forecast-update__trial-017",
-    "trials_dir": "demo_data/harbor_job",
+    "trials_dir": "examples/financial-review/demo_data/harbor_job",
     "agent": {"name": "codex", "model_name": "gpt-5.6"},
     "environment": {"type": "docker"},
     "verifier": {},

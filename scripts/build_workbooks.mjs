@@ -3,7 +3,7 @@ import path from "node:path";
 import { SpreadsheetFile, Workbook } from "@oai/artifact-tool";
 
 const root = process.cwd();
-const out = path.join(root, "demo_data");
+const out = path.join(root, "examples", "financial-review", "demo_data");
 
 const palette = {
   navy: "#132238",

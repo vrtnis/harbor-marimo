@@ -24,7 +24,7 @@ def _(Path, json, mo):
         _cli_sources = json.loads(_raw_sources) if _raw_sources else []
     except (TypeError, json.JSONDecodeError):
         _cli_sources = []
-    _demo = Path.cwd() / "demo_data" / "harbor_job"
+    _demo = Path.cwd() / "examples" / "financial-review" / "demo_data" / "harbor_job"
     if not _cli_sources and _demo.is_dir():
         _cli_sources = [str(_demo.resolve())]
     source_input = mo.ui.text_area(

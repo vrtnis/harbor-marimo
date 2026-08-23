@@ -30,7 +30,7 @@ Python 3.12 or newer is required, matching Harbor 0.20.
 
 ```bash
 uv sync --all-extras
-uv run harbor-marimo demo_data/harbor_job
+uv run harbor-marimo examples/financial-review/demo_data/harbor_job
 ```
 
 The first positional path implies the `view` command. The explicit form supports more
@@ -43,13 +43,13 @@ uv run harbor-marimo view jobs/eval-a jobs/eval-b --port 2718
 Open the generic notebook in editable Marimo mode:
 
 ```bash
-uv run harbor-marimo edit demo_data/harbor_job
+uv run harbor-marimo edit examples/financial-review/demo_data/harbor_job
 ```
 
 Export normalized evidence for another analysis system:
 
 ```bash
-uv run harbor-marimo export demo_data/harbor_job -o outputs/analysis.json
+uv run harbor-marimo export examples/financial-review/demo_data/harbor_job -o outputs/analysis.json
 ```
 
 Add `--include-raw` only when the downstream consumer needs complete original payloads.
@@ -113,11 +113,11 @@ contract.
 A financial-review proof of concept remains available as a domain application:
 
 ```bash
-uv run marimo run demo.py --port 2718
+uv run marimo run examples/financial-review/app.py --port 2718
 ```
 
 It adds workbook-specific review semantics on top of Harbor trials. See the
-[domain example documentation](examples/domain-financial-review/README.md).
+[domain example documentation](examples/financial-review/README.md).
 
 ## Design
 
@@ -144,7 +144,7 @@ verifier output, or final job results become diagnostics instead of crashing the
 ```bash
 uv sync --all-extras
 uv run python -m unittest discover -s tests -v
-uv run marimo check src/harbor_marimo/app.py demo.py
+uv run marimo check src/harbor_marimo/app.py examples/financial-review/app.py
 uv build
 ```
 

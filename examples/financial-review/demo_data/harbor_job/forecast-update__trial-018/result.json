@@ -9,7 +9,7 @@
   "config": {
     "task": {"path": "tasks/forecast-update-001", "source": "domain-example"},
     "trial_name": "forecast-update__trial-018",
-    "trials_dir": "demo_data/harbor_job",
+    "trials_dir": "examples/financial-review/demo_data/harbor_job",
     "agent": {"name": "claude-code", "model_name": "claude-sonnet-4.6"},
     "environment": {"type": "docker"},
     "verifier": {},

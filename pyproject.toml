@@ -51,8 +51,6 @@ include = [
   "/CONTRIBUTING.md",
   "/LICENSE",
   "/README.md",
-  "/demo.py",
-  "/demo_data",
   "/examples",
   "/pyproject.toml",
   "/scripts",

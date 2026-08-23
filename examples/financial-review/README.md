@@ -9,13 +9,12 @@ From the repository root:
 
 ```bash
 uv sync --all-extras
-uv run marimo run demo.py --port 2718
+uv run marimo run examples/financial-review/app.py --port 2718
 ```
 
-The app and fixtures currently live at the repository root for continuity with the proof
-of concept:
+The app and fixtures live together as an install-independent example:
 
-- `demo.py` — domain-specific Marimo application
+- `app.py` — domain-specific Marimo application
 - `demo_data/harbor_job/` — synthetic Harbor job with three trials
 - `scripts/build_workbooks.mjs` — deterministic workbook fixture builder
 

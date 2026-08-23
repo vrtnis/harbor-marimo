@@ -45,7 +45,13 @@ class PluginTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temp:
             output = Path(temp) / "exports"
             plugin = MarimoPlugin(output_dir=str(output), print_command=True)
-            job = SimpleNamespace(job_dir=ROOT / "demo_data" / "harbor_job")
+            job = SimpleNamespace(
+                job_dir=ROOT
+                / "examples"
+                / "financial-review"
+                / "demo_data"
+                / "harbor_job"
+            )
             stream = io.StringIO()
             with redirect_stdout(stream):
                 asyncio.run(plugin.on_job_start(job))

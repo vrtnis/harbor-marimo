@@ -10,7 +10,9 @@ ROOT = Path(__file__).resolve().parents[1]
 class FinancialDemoCharacterizationTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.job = load_harbor_job(ROOT / "demo_data" / "harbor_job")
+        cls.job = load_harbor_job(
+            ROOT / "examples" / "financial-review" / "demo_data" / "harbor_job"
+        )
 
     def test_expert_context_identifies_verifier_blind_spot(self):
         hardcoded, formula_driven, incomplete = self.job.trials

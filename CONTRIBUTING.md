@@ -8,7 +8,7 @@ generic Harbor evidence and domain-specific interpretation.
 ```bash
 uv sync --all-extras
 uv run python -m unittest discover -s tests -v
-uv run marimo check src/harbor_marimo/app.py demo.py
+uv run marimo check src/harbor_marimo/app.py examples/financial-review/app.py
 uv build
 ```
 

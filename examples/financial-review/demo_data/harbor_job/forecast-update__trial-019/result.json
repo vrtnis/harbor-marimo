@@ -9,7 +9,7 @@
   "config": {
     "task": {"path": "tasks/forecast-update-001", "source": "domain-example"},
     "trial_name": "forecast-update__trial-019",
-    "trials_dir": "demo_data/harbor_job",
+    "trials_dir": "examples/financial-review/demo_data/harbor_job",
     "agent": {"name": "mini-swe-agent", "model_name": "gpt-5.4-mini"},
     "environment": {"type": "docker"},
     "verifier": {},
