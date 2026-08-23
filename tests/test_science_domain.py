@@ -78,6 +78,10 @@ class ScienceDomainTests(unittest.TestCase):
         self.assertEqual(view.title, "Bayesian Model Validation")
         self.assertIn("posterior estimates", view.question)
         self.assertEqual(len(view.criteria), 4)
+        posterior = next(item for item in view.evidence if "posterior_summary" in (item.technical_label or ""))
+        self.assertEqual(posterior.label, "Posterior summary")
+        self.assertIn("R-hat", posterior.review_guidance or "")
+        self.assertTrue((posterior.technical_label or "").endswith("posterior_summary.csv"))
 
 
 if __name__ == "__main__":

@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from pathlib import PurePosixPath
+
 from ...models import AnalysisBundle
 from ...profiles import ReviewProfile
 from ..protocol import DomainEvidence, DomainView
@@ -35,18 +37,28 @@ class ScienceAdapter:
         for index, row in enumerate(rows):
             classification = classify_artifact(row)
             destination = str(row.get("destination") or f"artifact-{index + 1}")
+            presentation = (
+                self.profile.artifact_presentation(destination) if self.profile else None
+            )
             if classification.reason:
                 diagnostics.append(f"{destination}: {classification.reason}")
             evidence.append(
                 DomainEvidence(
                     key=f"artifact:{row['trial_id']}:{row.get('step_name')}:{index}",
-                    label=destination,
+                    label=(
+                        presentation.label
+                        if presentation and presentation.label
+                        else _human_artifact_label(destination)
+                    ),
                     kind=classification.kind,
                     job_id=str(row["job_id"]),
                     trial_id=str(row["trial_id"]),
                     step_name=row.get("step_name"),
                     path=classification.path,
                     summary=classification.label,
+                    description=presentation.description if presentation else None,
+                    review_guidance=presentation.guidance if presentation else None,
+                    technical_label=destination,
                     metadata={
                         "previewable": classification.previewable,
                         "size_bytes": row.get("size_bytes"),
@@ -75,3 +87,9 @@ class ScienceAdapter:
             diagnostics=tuple(diagnostics),
             metadata={"trial_count": trial_count, "artifact_count": len(evidence)},
         )
+
+
+def _human_artifact_label(destination: str) -> str:
+    name = PurePosixPath(destination.replace("\\", "/")).name
+    stem = name.rsplit(".", 1)[0]
+    return stem.replace("_", " ").replace("-", " ").strip().title() or "Artifact"
