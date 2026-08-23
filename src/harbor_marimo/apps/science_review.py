@@ -30,9 +30,11 @@ def _():
         criteria_rows,
         evidence_markdown,
         evidence_options,
+        expert_comparison_rows,
         review_header_markdown,
         review_steps_markdown,
         technical_details_markdown,
+        trial_options as build_trial_options,
     )
 
     return (
@@ -45,6 +47,7 @@ def _():
         diagnostic_findings,
         evidence_markdown,
         evidence_options,
+        expert_comparison_rows,
         escape,
         json,
         load,
@@ -56,6 +59,7 @@ def _():
         review_steps_markdown,
         science_glossary,
         technical_details_markdown,
+        build_trial_options,
     )
 
 
@@ -125,13 +129,8 @@ def _(default_source, load, source_input):
 
 
 @app.cell
-def _(mo, tables):
-    trial_options = {
-        f"{row['trial_name']} · {row['agent']} · reward {row['primary_reward']}": row[
-            "trial_id"
-        ]
-        for row in tables["trials"]
-    }
+def _(build_trial_options, mo, tables):
+    trial_options = build_trial_options(tables["trials"])
     trial_picker = mo.ui.dropdown(
         options=trial_options,
         value=next(iter(trial_options)),
@@ -372,8 +371,17 @@ def _(artifact_preview, escape, mo):
 
 
 @app.cell
-def _(bundle, compare_trials, diagnostic_findings, mo, selected_trial):
-    comparison_view = mo.ui.table(list(compare_trials(bundle)), selection=None)
+def _(
+    bundle,
+    compare_trials,
+    diagnostic_findings,
+    expert_comparison_rows,
+    mo,
+    selected_trial,
+):
+    comparison_view = mo.ui.table(
+        expert_comparison_rows(compare_trials(bundle)), selection=None
+    )
     findings = diagnostic_findings(bundle, trial_id=selected_trial["trial_id"])
     findings_view = (
         mo.ui.table(
