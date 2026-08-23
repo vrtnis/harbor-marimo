@@ -116,6 +116,9 @@ uv run harbor run ... \
 The plugin is optional. Loading a saved Harbor job directly is the primary integration
 contract.
 
+Cloud execution remains a Harbor concern. See [cloud sandbox compatibility](docs/cloud-sandboxes.md)
+for the opt-in CoreWeave installation and the downstream artifact handoff.
+
 ## Domain example
 
 A financial-review proof of concept remains available as a domain application:

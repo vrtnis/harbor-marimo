@@ -26,6 +26,9 @@ domain = [
 plugin = [
   "harbor>=0.20,<0.21",
 ]
+coreweave = [
+  "harbor[cwsandbox]>=0.20,<0.21",
+]
 
 [dependency-groups]
 dev = [
@@ -49,6 +52,7 @@ packages = ["src/harbor_marimo"]
 [tool.hatch.build.targets.sdist]
 include = [
   "/CONTRIBUTING.md",
+  "/docs",
   "/LICENSE",
   "/README.md",
   "/examples",
