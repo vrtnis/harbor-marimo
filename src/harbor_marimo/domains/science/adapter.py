@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from ...models import AnalysisBundle
+from ...profiles import ReviewProfile
 from ..protocol import DomainEvidence, DomainView
 from .artifacts import classify_artifact
 
@@ -10,6 +11,9 @@ from .artifacts import classify_artifact
 class ScienceAdapter:
     name = "science"
     label = "Scientific workflow review"
+
+    def __init__(self, profile: ReviewProfile | None = None) -> None:
+        self.profile = profile
 
     def supports(self, bundle: AnalysisBundle) -> bool:
         return bool(bundle.tables()["artifacts"])
@@ -59,8 +63,14 @@ class ScienceAdapter:
         )
         return DomainView(
             domain=self.name,
-            title=self.label,
-            summary=f"{len(evidence)} artifacts across {trial_count} trial(s).",
+            title=self.profile.title if self.profile else self.label,
+            summary=(
+                self.profile.summary
+                if self.profile and self.profile.summary
+                else f"{len(evidence)} artifacts across {trial_count} trial(s)."
+            ),
+            question=self.profile.question if self.profile else "",
+            criteria=self.profile.acceptance_criteria if self.profile else (),
             evidence=tuple(evidence),
             diagnostics=tuple(diagnostics),
             metadata={"trial_count": trial_count, "artifact_count": len(evidence)},

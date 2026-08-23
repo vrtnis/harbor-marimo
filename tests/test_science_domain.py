@@ -4,10 +4,12 @@ import unittest
 
 from harbor_marimo import load
 from harbor_marimo.domains.science import (
+    ScienceAdapter,
     compare_trials,
     diagnostic_findings,
     preview_artifact,
 )
+from harbor_marimo.profiles import load_review_profile
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -65,6 +67,17 @@ class ScienceDomainTests(unittest.TestCase):
 
         self.assertEqual(len(compare_trials(bundle)), 2)
         self.assertIn("Reported convergence failure", {item.label for item in findings})
+
+    def test_science_adapter_applies_optional_review_profile(self):
+        profile = load_review_profile(
+            ROOT / "examples" / "science-review" / "review_profile.json"
+        )
+
+        view = ScienceAdapter(profile).build_view(load(SCIENCE_JOB), trial_id="science-good")
+
+        self.assertEqual(view.title, "Bayesian Model Validation")
+        self.assertIn("posterior estimates", view.question)
+        self.assertEqual(len(view.criteria), 4)
 
 
 if __name__ == "__main__":
