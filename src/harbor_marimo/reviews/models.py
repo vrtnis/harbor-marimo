@@ -9,13 +9,45 @@ from typing import Any, Mapping
 from uuid import uuid4
 
 
-SCHEMA_VERSION = "harbor-marimo/review/v1"
+SCHEMA_VERSION = "harbor-marimo/review/v2"
 
 
 class ReviewVerdict(str, Enum):
     APPROVE = "approve"
     REJECT = "reject"
     NEEDS_FOLLOW_UP = "needs_follow_up"
+
+
+class CriterionStatus(str, Enum):
+    SATISFIED = "satisfied"
+    UNCERTAIN = "uncertain"
+    NOT_SATISFIED = "not_satisfied"
+
+
+@dataclass(frozen=True)
+class CriterionAssessment:
+    criterion_id: str
+    status: CriterionStatus
+    note: str = ""
+
+    def __post_init__(self) -> None:
+        if not self.criterion_id.strip():
+            raise ValueError("Criterion assessment id cannot be empty.")
+
+    def to_dict(self) -> dict[str, str]:
+        return {
+            "criterion_id": self.criterion_id,
+            "status": self.status.value,
+            "note": self.note,
+        }
+
+    @classmethod
+    def from_dict(cls, value: Mapping[str, Any]) -> "CriterionAssessment":
+        return cls(
+            criterion_id=str(value.get("criterion_id") or ""),
+            status=CriterionStatus(str(value.get("status") or "")),
+            note=str(value.get("note") or ""),
+        )
 
 
 @dataclass(frozen=True)
@@ -71,6 +103,8 @@ class ExpertReview:
     reviewer: str | None = None
     confidence: float | None = None
     evidence: tuple[EvidenceReference, ...] = ()
+    criteria: tuple[CriterionAssessment, ...] = ()
+    follow_up: str | None = None
     created_at: str = field(default_factory=lambda: _timestamp())
     updated_at: str = field(default_factory=lambda: _timestamp())
     schema_version: str = SCHEMA_VERSION
@@ -84,6 +118,9 @@ class ExpertReview:
         for reference in self.evidence:
             if reference.job_id != self.job_id or reference.trial_id != self.trial_id:
                 raise ValueError("Review evidence must reference the same job and trial.")
+        criterion_ids = [assessment.criterion_id for assessment in self.criteria]
+        if len(criterion_ids) != len(set(criterion_ids)):
+            raise ValueError("Review criterion assessments must be unique.")
 
     @classmethod
     def create(
@@ -97,6 +134,8 @@ class ExpertReview:
         reviewer: str | None = None,
         confidence: float | None = None,
         evidence: tuple[EvidenceReference, ...] = (),
+        criteria: tuple[CriterionAssessment, ...] = (),
+        follow_up: str | None = None,
     ) -> "ExpertReview":
         now = _timestamp()
         return cls(
@@ -109,6 +148,8 @@ class ExpertReview:
             reviewer=reviewer,
             confidence=confidence,
             evidence=evidence,
+            criteria=criteria,
+            follow_up=follow_up,
             created_at=now,
             updated_at=now,
         )
@@ -131,6 +172,8 @@ class ExpertReview:
             "reviewer": self.reviewer,
             "confidence": self.confidence,
             "evidence": [reference.to_dict() for reference in self.evidence],
+            "criteria": [assessment.to_dict() for assessment in self.criteria],
+            "follow_up": self.follow_up,
             "created_at": self.created_at,
             "updated_at": self.updated_at,
         }
@@ -141,8 +184,11 @@ class ExpertReview:
         if schema != SCHEMA_VERSION:
             raise ValueError(f"Unsupported review schema: {schema or 'missing'}")
         raw_evidence = value.get("evidence") or []
+        raw_criteria = value.get("criteria") or []
         if not isinstance(raw_evidence, list):
             raise ValueError("Review evidence must be a list.")
+        if not isinstance(raw_criteria, list):
+            raise ValueError("Review criteria must be a list.")
         return cls(
             schema_version=schema,
             review_id=str(value.get("review_id") or ""),
@@ -158,6 +204,12 @@ class ExpertReview:
                 for item in raw_evidence
                 if isinstance(item, Mapping)
             ),
+            criteria=tuple(
+                CriterionAssessment.from_dict(item)
+                for item in raw_criteria
+                if isinstance(item, Mapping)
+            ),
+            follow_up=_optional_string(value.get("follow_up")),
             created_at=str(value.get("created_at") or ""),
             updated_at=str(value.get("updated_at") or ""),
         )

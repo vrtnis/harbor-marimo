@@ -1,6 +1,12 @@
 import unittest
 
-from harbor_marimo.reviews import EvidenceReference, ExpertReview, ReviewVerdict
+from harbor_marimo.reviews import (
+    CriterionAssessment,
+    CriterionStatus,
+    EvidenceReference,
+    ExpertReview,
+    ReviewVerdict,
+)
 
 
 class ExpertReviewModelTests(unittest.TestCase):
@@ -23,12 +29,22 @@ class ExpertReviewModelTests(unittest.TestCase):
             reviewer="expert@example.com",
             confidence=0.9,
             evidence=(evidence,),
+            criteria=(
+                CriterionAssessment(
+                    criterion_id="formula_integrity",
+                    status=CriterionStatus.NOT_SATISFIED,
+                    note="A constant replaced the formula.",
+                ),
+            ),
+            follow_up="Restore the formula and rerun verification.",
         )
 
         restored = ExpertReview.from_dict(review.to_dict())
 
         self.assertEqual(restored, review)
         self.assertEqual(restored.evidence[0].locator, "Forecast!F16")
+        self.assertEqual(restored.criteria[0].status, CriterionStatus.NOT_SATISFIED)
+        self.assertIn("rerun", restored.follow_up or "")
 
     def test_confidence_is_bounded(self):
         with self.assertRaisesRegex(ValueError, "between 0 and 1"):
