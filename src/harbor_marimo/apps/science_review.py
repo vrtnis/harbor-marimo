@@ -28,6 +28,8 @@ def _():
     )
     from harbor_marimo.ui import (
         criteria_rows,
+        evidence_markdown,
+        evidence_options,
         review_header_markdown,
         review_steps_markdown,
         technical_details_markdown,
@@ -41,6 +43,8 @@ def _():
         compare_trials,
         criteria_rows,
         diagnostic_findings,
+        evidence_markdown,
+        evidence_options,
         escape,
         json,
         load,
@@ -138,17 +142,25 @@ def _(mo, tables):
 
 
 @app.cell
-def _(mo, tables, trial_picker):
+def _(mo, profile, tables, trial_picker):
     selected_trial = next(
         row for row in tables["trials"] if row["trial_id"] == trial_picker.value
     )
     selected_artifacts = [
         row for row in tables["artifacts"] if row["trial_id"] == trial_picker.value
     ]
-    artifact_options = {
-        str(row.get("destination") or f"Artifact {index + 1}"): str(index)
-        for index, row in enumerate(selected_artifacts)
-    }
+    artifact_options = {}
+    for _index, _row in enumerate(selected_artifacts):
+        _destination = str(_row.get("destination") or f"Artifact {_index + 1}")
+        _presentation = (
+            profile.artifact_presentation(_destination) if profile else None
+        )
+        _label = (
+            _presentation.label
+            if _presentation and _presentation.label
+            else _destination
+        )
+        artifact_options[_label] = str(_index)
     if not artifact_options:
         artifact_options = {"No collected artifact": "-1"}
     artifact_picker = mo.ui.dropdown(
@@ -165,6 +177,7 @@ def _(
     ScienceAdapter,
     bundle,
     criteria_rows,
+    evidence_options,
     guided,
     mo,
     profile,
@@ -187,11 +200,30 @@ def _(
     technical_view = mo.accordion(
         {"Technical run details": mo.md(technical_details_markdown(selected_trial))}
     )
-    return criteria_view, domain_view, header_view, steps_view, technical_view
+    evidence_citation_input = mo.ui.multiselect(
+        options=evidence_options(domain_view.evidence),
+        label="Evidence supporting this judgment",
+        full_width=True,
+    )
+    return (
+        criteria_view,
+        domain_view,
+        evidence_citation_input,
+        header_view,
+        steps_view,
+        technical_view,
+    )
 
 
 @app.cell
-def _(artifact_picker, preview_artifact, selected_artifacts):
+def _(
+    artifact_picker,
+    domain_view,
+    evidence_markdown,
+    mo,
+    preview_artifact,
+    selected_artifacts,
+):
     artifact_index = int(artifact_picker.value)
     selected_artifact = (
         selected_artifacts[artifact_index] if artifact_index >= 0 else None
@@ -199,7 +231,15 @@ def _(artifact_picker, preview_artifact, selected_artifacts):
     artifact_preview = (
         preview_artifact(selected_artifact) if selected_artifact else None
     )
-    return artifact_preview, selected_artifact
+    selected_evidence = (
+        domain_view.evidence[artifact_index] if artifact_index >= 0 else None
+    )
+    evidence_context_view = (
+        mo.md(evidence_markdown(selected_evidence))
+        if selected_evidence
+        else mo.md("No evidence was collected for this attempt.")
+    )
+    return artifact_preview, evidence_context_view, selected_artifact, selected_evidence
 
 
 @app.cell
@@ -255,6 +295,8 @@ def _(
     EvidenceReference,
     confidence_input,
     decision_input,
+    domain_view,
+    evidence_citation_input,
     mo,
     note_input,
     record_review,
@@ -262,23 +304,24 @@ def _(
     review_store,
     reviewer_input,
     save_button,
-    selected_artifact,
     selected_trial,
 ):
     save_status = mo.md(f"Sidecar destination: `{review_directory}`")
     if save_button.value:
-        evidence = ()
-        if selected_artifact:
-            evidence = (
+        cited_keys = set(evidence_citation_input.value)
+        evidence = tuple(
                 EvidenceReference(
-                    key=f"artifact:{selected_artifact.get('destination')}",
-                    kind="artifact",
+                    key=item.key,
+                    kind=item.kind,
                     job_id=selected_trial["job_id"],
                     trial_id=selected_trial["trial_id"],
-                    step_name=selected_artifact.get("step_name"),
-                    label=selected_artifact.get("destination"),
-                    path=selected_artifact.get("path"),
-                ),
+                    step_name=item.step_name,
+                    label=item.label,
+                    path=str(item.path) if item.path else None,
+                    locator=item.technical_label,
+                )
+                for item in domain_view.evidence
+                if item.key in cited_keys
             )
         review, destination = record_review(
             review_store,
@@ -358,6 +401,8 @@ def _(
     criteria_view,
     developer,
     decision_input,
+    evidence_citation_input,
+    evidence_context_view,
     findings_view,
     header_view,
     mo,
@@ -399,12 +444,14 @@ def _(
             profile_error_view,
             mo.hstack([trial_picker, artifact_picker], widths="equal"),
             mo.md("## Collected scientific evidence"),
+            evidence_context_view,
             preview_view,
             mo.md("## Verifier diagnostic signals"),
             findings_view,
             mo.md("## Compare trials"),
             comparison_view,
             mo.md("## Domain-expert judgment"),
+            evidence_citation_input,
             decision_input,
             note_input,
             reviewer_input,
