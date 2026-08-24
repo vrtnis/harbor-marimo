@@ -9,12 +9,14 @@ from .models import (
     VerifierCheck,
     VerifierFixture,
 )
+from .store import TaskDraftStore
 
 __all__ = [
     "ArtifactContract",
     "ArtifactField",
     "ScientificBrief",
     "TaskDraft",
+    "TaskDraftStore",
     "TaskMetadata",
     "VerifierCheck",
     "VerifierFixture",
