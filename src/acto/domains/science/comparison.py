@@ -5,7 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 import re
 
-from ...models import AnalysisBundle, JsonObject
+from harbor_marimo.models import AnalysisBundle, JsonObject
 
 
 @dataclass(frozen=True)

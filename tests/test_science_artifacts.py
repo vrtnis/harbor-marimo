@@ -2,7 +2,7 @@ from pathlib import Path
 import unittest
 
 from harbor_marimo import load
-from harbor_marimo.domains.science import ScienceAdapter, classify_artifact
+from acto.domains.science import ScienceAdapter, classify_artifact
 
 
 ROOT = Path(__file__).resolve().parents[1]

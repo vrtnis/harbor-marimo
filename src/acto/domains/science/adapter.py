@@ -4,8 +4,9 @@ from __future__ import annotations
 
 from pathlib import PurePosixPath
 
-from ...models import AnalysisBundle
-from ...profiles import ReviewProfile
+from harbor_marimo.models import AnalysisBundle
+
+from acto.profiles import ReviewProfile
 from ..protocol import DomainEvidence, DomainView
 from .artifacts import classify_artifact
 

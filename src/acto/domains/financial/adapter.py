@@ -7,8 +7,8 @@ from pathlib import Path
 from typing import Any
 import json
 
-from ...loader import load
-from ...models import HarborJob, JsonObject, Trial
+from harbor_marimo.loader import load
+from harbor_marimo.models import HarborJob, JsonObject, Trial
 
 
 def _read_context(trial: Trial) -> JsonObject:

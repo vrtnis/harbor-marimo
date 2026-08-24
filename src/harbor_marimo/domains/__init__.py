@@ -1,12 +1,4 @@
-"""Domain adapters for expert-facing Harbor review applications."""
+"""Compatibility imports for domain logic now provided by :mod:`acto.domains`."""
 
-from .protocol import DomainAdapter, DomainEvidence, DomainView
-from .registry import DomainRegistry, domains
-
-__all__ = [
-    "DomainAdapter",
-    "DomainEvidence",
-    "DomainRegistry",
-    "DomainView",
-    "domains",
-]
+from acto.domains import *  # noqa: F401,F403
+from acto.domains import __all__

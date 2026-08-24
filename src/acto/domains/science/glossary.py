@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from ...profiles import ReviewProfile
+from acto.profiles import ReviewProfile
 
 
 DEFAULT_SCIENCE_GLOSSARY = {

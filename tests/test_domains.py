@@ -1,8 +1,8 @@
 from pathlib import Path
 import unittest
 
-from harbor_marimo.domains import DomainEvidence, DomainRegistry, DomainView
-from harbor_marimo.profiles import ReviewCriterion
+from acto.domains import DomainEvidence, DomainRegistry, DomainView
+from acto.profiles import ReviewCriterion
 
 
 class ExampleAdapter:

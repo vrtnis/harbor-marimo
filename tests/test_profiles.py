@@ -3,7 +3,7 @@ from pathlib import Path
 import tempfile
 import unittest
 
-from harbor_marimo.profiles import ReviewProfile, load_review_profile
+from acto.profiles import ReviewProfile, load_review_profile
 
 
 class ReviewProfileTests(unittest.TestCase):
