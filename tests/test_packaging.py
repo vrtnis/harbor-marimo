@@ -2,11 +2,18 @@ from pathlib import Path
 from types import SimpleNamespace
 import unittest
 
+import acto
 import harbor_marimo
 from harbor_marimo.cli import marimo_command
 
 
 class PackagedAppTests(unittest.TestCase):
+    def test_acto_is_a_packaged_namespace(self):
+        package = Path(acto.__file__).resolve().parent
+
+        self.assertTrue((package / "__init__.py").is_file())
+        self.assertEqual(acto.__version__, harbor_marimo.__version__)
+
     def test_analysis_and_expert_apps_are_inside_the_package(self):
         package = Path(harbor_marimo.__file__).resolve().parent
 
