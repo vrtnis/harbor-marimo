@@ -202,7 +202,7 @@ def marimo_command(args: argparse.Namespace) -> list[str]:
         app_name = "task_studio.py"
     elif args.command == "review-task":
         app_name = "task_review.py"
-    if args.command == "author":
+    if args.command in {"author", "review-task"}:
         import acto
 
         app_path = Path(acto.__file__).with_name("apps").joinpath(app_name).resolve()

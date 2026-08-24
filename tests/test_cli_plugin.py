@@ -149,6 +149,7 @@ class CliTests(unittest.TestCase):
         command = marimo_command(args)
 
         self.assertEqual(Path(command[command.index("--") - 1]).name, "task_review.py")
+        self.assertEqual(Path(command[command.index("--") - 1]).parent.parent.name, "acto")
         self.assertIn("--task", command)
         self.assertIn("--review-dir", command)
 
