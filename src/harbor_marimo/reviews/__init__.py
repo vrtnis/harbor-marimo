@@ -1,21 +1,4 @@
-"""Durable expert judgments linked to immutable Harbor evidence."""
+"""Compatibility imports for expert reviews now provided by :mod:`acto.reviews`."""
 
-from .models import (
-    CriterionAssessment,
-    CriterionStatus,
-    EvidenceReference,
-    ExpertReview,
-    ReviewVerdict,
-)
-from .service import record_review
-from .store import JsonReviewStore
-
-__all__ = [
-    "CriterionAssessment",
-    "CriterionStatus",
-    "EvidenceReference",
-    "ExpertReview",
-    "JsonReviewStore",
-    "ReviewVerdict",
-    "record_review",
-]
+from acto.reviews import *  # noqa: F401,F403
+from acto.reviews import __all__

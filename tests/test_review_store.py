@@ -2,7 +2,7 @@ from pathlib import Path
 import tempfile
 import unittest
 
-from harbor_marimo.reviews import ExpertReview, JsonReviewStore
+from acto.reviews import ExpertReview, JsonReviewStore
 
 
 class JsonReviewStoreTests(unittest.TestCase):

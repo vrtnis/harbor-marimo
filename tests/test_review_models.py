@@ -1,6 +1,6 @@
 import unittest
 
-from harbor_marimo.reviews import (
+from acto.reviews import (
     CriterionAssessment,
     CriterionStatus,
     EvidenceReference,
