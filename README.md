@@ -4,30 +4,23 @@
 [ATIF](https://harborframework.com/docs/agents/trajectory-format) trajectories into
 reactive, reproducible [Marimo](https://marimo.io/) analysis workspaces.
 
-It is the programmable analysis layer beside Harbor's operational viewer: use Harbor to
-run and monitor evaluations; use `harbor-marimo` when an investigation needs custom
-comparisons, domain evidence, or a notebook that can be reviewed and rerun.
-
-The [`acto`](src/acto) folder uses this integration to demonstrate domain-expert
-workflows. An example Task Studio is included for creating benchmark tasks, acceptance
-criteria, verifiers, and test fixtures.
+Use Harbor to run and monitor evaluations; use `harbor-marimo` for custom comparisons,
+domain evidence, and reproducible investigation. The [**Acto**](src/acto) folder contains
+example domain-expert workflows built on the integration.
 
 `harbor-marimo` is in active development. It is currently an alpha source package and is
 not yet published to PyPI or listed as an official Harbor community integration.
 
 ## What it does
 
-- Loads one or more complete or in-progress Harbor job directories.
-- Resolves job, trial, `result.json`, and ATIF paths to their enclosing jobs.
+- Loads complete or in-progress Harbor jobs from job, trial, result, or ATIF paths.
 - Normalizes jobs, trials, step rewards, trajectories, tool calls, observations,
   artifacts, verifier files, and loader diagnostics into related tables.
-- Preserves raw Harbor and ATIF payloads in the Python model and optional JSON export.
-- Opens a generic Marimo workspace for comparisons and evidence inspection.
-- Provides a small Harbor plugin that prints the analysis handoff and can export tables
-  after a job.
-- Includes scientific and financial Acto examples with evidence-linked result reviews.
-- Includes an example Acto Task Studio and independent Task Review workflow that export
-  standard Harbor tasks with declarative, fixture-tested verifiers.
+- Preserves raw payloads and source provenance in the Python model and optional JSON export.
+- Opens a generic Marimo workspace and provides an optional Harbor plugin for analysis
+  handoff and table export.
+- Includes scientific and financial Acto examples for task authoring, independent review,
+  and evidence-linked result grading.
 
 ## Quick start from this repository
 
@@ -38,14 +31,13 @@ uv sync --extra domain --extra plugin
 uv run harbor-marimo examples/financial-review/demo_data/harbor_job
 ```
 
-The first positional path implies the `view` command. The explicit form supports more
-than one job:
+The first path implies `view`; use the explicit form for multiple jobs:
 
 ```bash
 uv run harbor-marimo view jobs/eval-a jobs/eval-b --port 2718
 ```
 
-Open the generic notebook in editable Marimo mode:
+Open the workspace in editable mode:
 
 ```bash
 uv run harbor-marimo edit examples/financial-review/demo_data/harbor_job
@@ -56,34 +48,6 @@ Export normalized evidence for another analysis system:
 ```bash
 uv run harbor-marimo export examples/financial-review/demo_data/harbor_job -o outputs/analysis.json
 ```
-
-Open the expert workflow and persist judgments as sidecars:
-
-```bash
-uv run acto review-results examples/financial-review/demo_data/harbor_job \
-  --domain financial \
-  --review-dir outputs/reviews
-```
-
-Author a scientific benchmark task from the included synthetic draft:
-
-```bash
-uv run acto studio examples/science-task-authoring/draft.json --port 2722
-```
-
-See the [domain-expert task-authoring workflow](docs/task-authoring.md) for verifier
-fixtures, Harbor export, oracle/nop validation, and CoreWeave handoff responsibilities.
-
-Independently review the exported benchmark task itself:
-
-```bash
-uv run acto review-task \
-  examples/science-task-review/bayesian-posterior-convergence \
-  --review-dir outputs/task-reviews
-```
-
-The [task-review lifecycle](docs/task-review.md) separates author validation, domain review,
-technical review, final benchmark approval, and later agent-result grading.
 
 Add `--include-raw` only when the downstream consumer needs complete original payloads.
 Exports retain source provenance and can contain absolute local paths. Keep local exports
@@ -129,8 +93,8 @@ style as `harbor-atif2otel`:
 uv run harbor run ... --plugin marimo
 ```
 
-By default it prints a command for opening the completed job. To also create normalized
-JSON without launching a server:
+By default it prints a command for opening the completed job. It can also export normalized
+JSON without starting a server:
 
 ```bash
 uv run harbor run ... \
@@ -141,13 +105,11 @@ uv run harbor run ... \
 The plugin is optional. Loading a saved Harbor job directly is the primary integration
 contract.
 
-Cloud execution remains a Harbor concern. See [cloud sandbox compatibility](docs/cloud-sandboxes.md)
-for the opt-in CoreWeave installation and the downstream artifact handoff.
+Cloud execution remains a Harbor responsibility. See
+[cloud sandbox compatibility](docs/cloud-sandboxes.md) for CoreWeave installation and
+artifact handoff.
 
 ## Examples
-
-The [`acto`](src/acto) folder uses the Harbor-Marimo integration to demonstrate
-domain-expert workflows.
 
 - **Scientific:** An example Task Studio supports creating benchmark tasks, acceptance
   criteria, verifiers, and fixtures. The scientific applications also demonstrate
@@ -156,10 +118,13 @@ domain-expert workflows.
 
   ```bash
   uv run acto studio examples/science-task-authoring/draft.json --port 2722
+  uv run acto review-task \
+    examples/science-task-review/bayesian-posterior-convergence
   ```
 
   See the [task-authoring](examples/science-task-authoring/README.md) and
-  [scientific review](examples/science-review/README.md) examples.
+  [scientific review](examples/science-review/README.md) examples, plus the
+  [task-review lifecycle](docs/task-review.md).
 
 - **Financial:** An example result-review application adds workbook-specific evidence and
   expert judgments to Harbor trials.
