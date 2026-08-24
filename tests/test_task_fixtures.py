@@ -11,6 +11,7 @@ from harbor_marimo.tasks import (
     VerifierCheck,
     VerifierFixture,
     evaluate_fixtures,
+    run_fixture_workbench,
 )
 
 
@@ -55,6 +56,18 @@ class VerifierFixtureTests(unittest.TestCase):
 
         self.assertEqual([item.matched for item in results], [True, True])
         self.assertEqual([item.actual_pass for item in results], [True, False])
+
+    def test_workbench_requires_valid_invalid_and_machine_checks(self) -> None:
+        draft = TaskDraft.create(
+            task_name="incomplete-task",
+            metadata=TaskMetadata(author_name="Expert"),
+            brief=ScientificBrief(title="Task", instruction="Produce output."),
+        )
+
+        report = run_fixture_workbench(draft, Path.cwd())
+
+        self.assertFalse(report.complete)
+        self.assertEqual(len(report.requirements), 3)
 
 
 if __name__ == "__main__":

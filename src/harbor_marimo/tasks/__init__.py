@@ -16,6 +16,7 @@ from .render import render_instruction, render_task_toml
 from .store import TaskDraftStore
 from .templates import REQUIRED_TASK_FILES, task_template_root
 from .verifier import CheckResult, evaluate_check, evaluate_checks
+from .workbench import FixtureSuiteReport, run_fixture_workbench
 
 __all__ = [
     "ArtifactContract",
@@ -23,9 +24,11 @@ __all__ = [
     "ArtifactIssue",
     "CheckResult",
     "FixtureResult",
+    "FixtureSuiteReport",
     "REQUIRED_TASK_FILES",
     "render_instruction",
     "render_task_toml",
+    "run_fixture_workbench",
     "ScientificBrief",
     "TaskDraft",
     "TaskDraftStore",
