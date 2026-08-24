@@ -79,6 +79,11 @@ def _parser() -> argparse.ArgumentParser:
         help="Optional JSON profile with expert-facing question, criteria, and labels.",
     )
     review.add_argument(
+        "--task",
+        default=None,
+        help="Exported task directory whose criteria should guide scientific result review.",
+    )
+    review.add_argument(
         "--guided",
         action="store_true",
         help="Show facilitated onboarding guidance and a training banner.",
@@ -211,6 +216,16 @@ def marimo_command(args: argparse.Namespace) -> list[str]:
         review_dir = str(Path(args.review_dir).expanduser().resolve())
         command.extend(["--review-dir", review_dir])
         profile = getattr(args, "profile", None)
+        task = getattr(args, "task", None)
+        if not profile and task:
+            task_root = Path(task).expanduser().resolve()
+            candidate = task_root.parent / f"{task_root.name}.review-profile.json"
+            if not candidate.is_file():
+                raise FileNotFoundError(
+                    "The exported task has no adjacent result-review profile: "
+                    f"{candidate}"
+                )
+            profile = str(candidate)
         if profile:
             command.extend(["--profile", str(Path(profile).expanduser().resolve())])
         if getattr(args, "guided", False):

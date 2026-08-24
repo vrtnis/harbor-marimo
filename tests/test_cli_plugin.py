@@ -74,6 +74,7 @@ class CliTests(unittest.TestCase):
             headless=False,
             token=None,
             profile="examples/science-review/review_profile.json",
+            task=None,
             guided=True,
             developer=False,
         )
@@ -85,6 +86,34 @@ class CliTests(unittest.TestCase):
         self.assertIn("--guided", command)
         self.assertEqual(command[command.index("--guided") + 1], "true")
         self.assertNotIn("--developer", command)
+
+    def test_science_review_can_derive_profile_from_exported_task(self):
+        with tempfile.TemporaryDirectory() as temp:
+            task = Path(temp) / "posterior-check"
+            task.mkdir()
+            profile = task.parent / "posterior-check.review-profile.json"
+            profile.write_text("{}", encoding="utf-8")
+            args = SimpleNamespace(
+                command="review",
+                paths=["job"],
+                domain="science",
+                review_dir="reviews",
+                port=None,
+                host="127.0.0.1",
+                headless=False,
+                token=None,
+                profile=None,
+                task=str(task),
+                guided=False,
+                developer=False,
+            )
+
+            command = marimo_command(args)
+
+            self.assertEqual(
+                Path(command[command.index("--profile") + 1]),
+                profile,
+            )
 
     def test_author_command_opens_task_studio_with_draft(self):
         args = SimpleNamespace(

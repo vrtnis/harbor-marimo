@@ -16,6 +16,7 @@ from .conflicts import (
     validate_task_review,
 )
 from .loader import TaskBundle, TaskFile, load_task_bundle, read_task_evidence
+from .handoff import result_review_command, result_review_profile_path
 from .rubric import TASK_REVIEW_RUBRIC, TaskRubricCriterion, rubric_for_role
 from .store import TaskReviewStore
 
@@ -38,5 +39,7 @@ __all__ = [
     "validate_task_review",
     "load_task_bundle",
     "read_task_evidence",
+    "result_review_command",
+    "result_review_profile_path",
     "rubric_for_role",
 ]
