@@ -40,7 +40,7 @@ def _():
 
 
 @app.cell
-def _(Path, TaskReviewStore, load_task_bundle, mo):
+def _(Path, TaskReviewStore, mo):
     cli = mo.cli_args()
     default_task = (
         Path.cwd()
@@ -54,24 +54,28 @@ def _(Path, TaskReviewStore, load_task_bundle, mo):
         debounce=600,
         full_width=True,
     )
+    review_directory = Path(
+        cli.get("review-dir") or Path.cwd() / "outputs" / "task-reviews"
+    ).expanduser().resolve()
+    task_review_store = TaskReviewStore(review_directory)
+    return (
+        cli,
+        default_task,
+        review_directory,
+        task_path_input,
+        task_review_store,
+    )
+
+
+@app.cell
+def _(default_task, load_task_bundle, task_path_input):
     bundle_error = None
     try:
         task_bundle = load_task_bundle(task_path_input.value)
     except (FileNotFoundError, OSError, TypeError, ValueError) as exc:
         bundle_error = str(exc)
         task_bundle = load_task_bundle(default_task)
-    review_directory = Path(
-        cli.get("review-dir") or Path.cwd() / "outputs" / "task-reviews"
-    ).expanduser().resolve()
-    task_review_store = TaskReviewStore(review_directory)
-    return (
-        bundle_error,
-        cli,
-        review_directory,
-        task_bundle,
-        task_path_input,
-        task_review_store,
-    )
+    return bundle_error, task_bundle
 
 
 @app.cell
