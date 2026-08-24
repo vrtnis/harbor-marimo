@@ -11,10 +11,18 @@ def _():
 
     import marimo as mo
 
-    from harbor_marimo.tasks import ScientificBrief, TaskDraft, TaskMetadata
+    from harbor_marimo.tasks import (
+        ArtifactContract,
+        ArtifactField,
+        ScientificBrief,
+        TaskDraft,
+        TaskMetadata,
+    )
     from harbor_marimo.ui import authoring_progress_markdown, task_summary_markdown
 
     return (
+        ArtifactContract,
+        ArtifactField,
         Path,
         ScientificBrief,
         TaskDraft,
@@ -184,6 +192,119 @@ def _(
 
 
 @app.cell
+def _(authored_draft, mo):
+    artifact_seed = [
+        {
+            "path": item.path,
+            "format": item.format,
+            "description": item.description,
+            "required": item.required,
+        }
+        for item in authored_draft.artifacts
+    ] or [
+        {
+            "path": "results/answer.csv",
+            "format": "csv",
+            "description": "Primary scientific result",
+            "required": True,
+        }
+    ]
+    field_seed = [
+        {
+            "artifact": item.path,
+            "name": field.name,
+            "data_type": field.data_type,
+            "required": field.required,
+            "description": field.description,
+        }
+        for item in authored_draft.artifacts
+        for field in item.fields
+    ]
+    artifact_editor = mo.ui.data_editor(
+        artifact_seed,
+        label="Result files the agent must produce",
+    )
+    field_editor = mo.ui.data_editor(
+        field_seed,
+        label="Required fields inside CSV or JSON results",
+    )
+    return artifact_editor, field_editor
+
+
+@app.cell
+def _(
+    ArtifactContract,
+    ArtifactField,
+    artifact_editor,
+    authored_draft,
+    field_editor,
+):
+    artifact_error = None
+    artifact_contracts = authored_draft.artifacts
+    try:
+        field_rows = list(field_editor.value)
+        contract_rows = list(artifact_editor.value)
+        artifact_contracts = tuple(
+            ArtifactContract(
+                path=str(row.get("path") or "").strip(),
+                format=str(row.get("format") or "file").strip().lower(),
+                description=str(row.get("description") or "").strip(),
+                required=bool(row.get("required", True)),
+                fields=tuple(
+                    ArtifactField(
+                        name=str(field.get("name") or "").strip(),
+                        data_type=str(field.get("data_type") or "string").strip(),
+                        required=bool(field.get("required", True)),
+                        description=str(field.get("description") or "").strip(),
+                    )
+                    for field in field_rows
+                    if str(field.get("artifact") or "").strip()
+                    == str(row.get("path") or "").strip()
+                    and str(field.get("name") or "").strip()
+                ),
+            )
+            for row in contract_rows
+            if str(row.get("path") or "").strip()
+        )
+        contract_draft = authored_draft.updated(artifacts=artifact_contracts)
+    except (AttributeError, TypeError, ValueError) as exc:
+        contract_draft = authored_draft
+        artifact_error = str(exc)
+    return artifact_contracts, artifact_error, contract_draft
+
+
+@app.cell
+def _(artifact_editor, artifact_error, contract_draft, field_editor, mo):
+    artifact_error_view = (
+        mo.callout(mo.md(artifact_error), kind="warn")
+        if artifact_error
+        else mo.md("")
+    )
+    artifact_contract_view = mo.vstack(
+        [
+            mo.md("## 2. Specify the result artifacts"),
+            mo.md(
+                "List the evidence a successful agent must leave behind. Paths are relative "
+                "to the task workspace; use a separate row for every result file."
+            ),
+            artifact_editor,
+            mo.md(
+                "For structured results, list the fields that must be present. The "
+                "**artifact** value must match a result-file path above."
+            ),
+            field_editor,
+            artifact_error_view,
+            mo.callout(
+                mo.md(f"**{len(contract_draft.artifacts)} artifact contract(s) defined.**"),
+                kind="success" if contract_draft.artifacts else "warn",
+            ),
+        ],
+        gap=1,
+    )
+    return (artifact_contract_view,)
+
+
+@app.cell
 def _(
     author_input,
     conflicts_input,
@@ -226,6 +347,7 @@ def _(
     authoring_progress_markdown,
     authored_draft,
     authored_draft_error,
+    artifact_contract_view,
     brief_form_view,
     draft_error,
     mo,
@@ -261,6 +383,7 @@ def _(
                 gap=2,
             ),
             brief_form_view,
+            artifact_contract_view,
         ],
         gap=2,
     )
