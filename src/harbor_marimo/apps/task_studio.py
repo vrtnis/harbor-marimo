@@ -18,6 +18,8 @@ def _():
         TaskDraft,
         TaskMetadata,
         VerifierCheck,
+        VerifierFixture,
+        run_fixture_workbench,
     )
     from harbor_marimo.ui import authoring_progress_markdown, task_summary_markdown
 
@@ -29,9 +31,11 @@ def _():
         TaskDraft,
         TaskMetadata,
         VerifierCheck,
+        VerifierFixture,
         authoring_progress_markdown,
         json,
         mo,
+        run_fixture_workbench,
         task_summary_markdown,
     )
 
@@ -423,6 +427,163 @@ def _(check_editor, mo, verifier_draft, verifier_error):
 
 
 @app.cell
+def _(Path, draft_path, mo, verifier_draft):
+    default_root = draft_path.parent if draft_path else Path.cwd()
+    fixture_root_input = mo.ui.text(
+        value=str(default_root),
+        label="Folder containing the draft and example outputs",
+        full_width=True,
+    )
+    oracle_path_input = mo.ui.text(
+        value=verifier_draft.oracle_path,
+        label="Reference-solution script (relative to that folder)",
+        full_width=True,
+    )
+    fixture_seed = [
+        {
+            "name": item.name,
+            "folder": item.source,
+            "should_pass": item.expected_pass,
+            "why": item.explanation,
+        }
+        for item in verifier_draft.fixtures
+    ] or [
+        {
+            "name": "Known good result",
+            "folder": "valid_output",
+            "should_pass": True,
+            "why": "A scientifically acceptable reference result.",
+        },
+        {
+            "name": "Known bad result",
+            "folder": "invalid_outputs/nonconverged",
+            "should_pass": False,
+            "why": "A result with the failure mode the verifier must reject.",
+        },
+    ]
+    fixture_editor = mo.ui.data_editor(
+        fixture_seed,
+        label="Known examples used to challenge the verifier",
+    )
+    test_fixtures_button = mo.ui.run_button(label="Test these examples")
+    return (
+        fixture_editor,
+        fixture_root_input,
+        oracle_path_input,
+        test_fixtures_button,
+    )
+
+
+@app.cell
+def _(
+    Path,
+    VerifierFixture,
+    fixture_editor,
+    fixture_root_input,
+    oracle_path_input,
+    verifier_draft,
+):
+    fixture_error = None
+    fixture_values = verifier_draft.fixtures
+    try:
+        fixture_values = tuple(
+            VerifierFixture(
+                name=str(row.get("name") or "").strip(),
+                source=str(row.get("folder") or "").strip(),
+                expected_pass=bool(row.get("should_pass", False)),
+                explanation=str(row.get("why") or "").strip(),
+            )
+            for row in list(fixture_editor.value)
+            if str(row.get("name") or "").strip()
+            and str(row.get("folder") or "").strip()
+        )
+        fixture_draft = verifier_draft.updated(
+            fixtures=fixture_values,
+            oracle_path=oracle_path_input.value.strip() or "solution/solve.sh",
+        )
+        fixture_root = Path(fixture_root_input.value).expanduser().resolve()
+    except (AttributeError, OSError, TypeError, ValueError) as exc:
+        fixture_draft = verifier_draft
+        fixture_root = Path.cwd()
+        fixture_error = str(exc)
+    return fixture_draft, fixture_error, fixture_root, fixture_values
+
+
+@app.cell
+def _(fixture_draft, fixture_root, run_fixture_workbench, test_fixtures_button):
+    fixture_report = (
+        run_fixture_workbench(fixture_draft, fixture_root)
+        if test_fixtures_button.value
+        else None
+    )
+    return (fixture_report,)
+
+
+@app.cell
+def _(
+    fixture_editor,
+    fixture_error,
+    fixture_report,
+    fixture_root_input,
+    mo,
+    oracle_path_input,
+    test_fixtures_button,
+):
+    if fixture_report is None:
+        fixture_result_view = mo.callout(
+            mo.md(
+                "Select **Test these examples** after the example folders exist. "
+                "This reads result files only; it does not execute the oracle."
+            ),
+            kind="neutral",
+        )
+    elif fixture_report.passed:
+        fixture_result_view = mo.vstack(
+            [
+                mo.callout(
+                    mo.md("The verifier correctly classified every known example."),
+                    kind="success",
+                ),
+                mo.ui.table(fixture_report.rows(), selection=None),
+            ]
+        )
+    else:
+        requirements = "\n".join(f"- {item}" for item in fixture_report.requirements)
+        fixture_result_view = mo.vstack(
+            [
+                mo.callout(
+                    mo.md(requirements or "One or more examples behaved unexpectedly."),
+                    kind="warn",
+                ),
+                mo.ui.table(fixture_report.rows(), selection=None),
+            ]
+        )
+    fixture_error_view = (
+        mo.callout(mo.md(fixture_error), kind="warn")
+        if fixture_error
+        else mo.md("")
+    )
+    fixture_workbench_view = mo.vstack(
+        [
+            mo.md("## 4. Test known examples"),
+            mo.md(
+                "Provide at least one result that should pass and one that should fail. "
+                "These examples make the scientific boundary explicit and guard against "
+                "a verifier that accepts everything."
+            ),
+            fixture_root_input,
+            oracle_path_input,
+            fixture_editor,
+            test_fixtures_button,
+            fixture_error_view,
+            fixture_result_view,
+        ],
+        gap=1,
+    )
+    return (fixture_workbench_view,)
+
+
+@app.cell
 def _(
     author_input,
     conflicts_input,
@@ -468,6 +629,7 @@ def _(
     artifact_contract_view,
     brief_form_view,
     draft_error,
+    fixture_workbench_view,
     mo,
     task_summary_markdown,
     verifier_builder_view,
@@ -505,6 +667,7 @@ def _(
             brief_form_view,
             artifact_contract_view,
             verifier_builder_view,
+            fixture_workbench_view,
         ],
         gap=2,
     )
