@@ -30,6 +30,7 @@ _COMMANDS = {
     "verifier",
     "validate-task",
     "export-task",
+    "review-task",
 }
 
 
@@ -162,6 +163,22 @@ def _parser() -> argparse.ArgumentParser:
         default=None,
         help="Folder containing the draft's oracle; defaults to the draft's folder.",
     )
+
+    review_task = subparsers.add_parser(
+        "review-task",
+        help="Open an independent review workspace for an exported Harbor task.",
+    )
+    review_task.add_argument("task", help="Exported Harbor task directory.")
+    review_task.add_argument("--review-dir", default="outputs/task-reviews")
+    review_task.add_argument("--port", type=int, default=None)
+    review_task.add_argument("--host", default="127.0.0.1")
+    review_task.add_argument("--headless", action="store_true")
+    review_task.add_argument(
+        "--token",
+        action=argparse.BooleanOptionalAction,
+        default=None,
+        help="Enable or disable Marimo session authentication.",
+    )
     return parser
 
 
@@ -183,6 +200,8 @@ def marimo_command(args: argparse.Namespace) -> list[str]:
         app_name = "science_review.py" if args.domain == "science" else "expert_review.py"
     elif args.command == "author":
         app_name = "task_studio.py"
+    elif args.command == "review-task":
+        app_name = "task_review.py"
     app_path = Path(__file__).with_name("apps").joinpath(app_name).resolve()
     marimo_mode = "edit" if args.command == "edit" else "run"
     command = [sys.executable, "-m", "marimo", marimo_mode]
@@ -206,6 +225,16 @@ def marimo_command(args: argparse.Namespace) -> list[str]:
                 str(Path(args.draft_dir).expanduser().resolve()),
                 "--output-dir",
                 str(Path(args.output_dir).expanduser().resolve()),
+            ]
+        )
+        return command
+    if args.command == "review-task":
+        command.extend(
+            [
+                "--task",
+                str(Path(args.task).expanduser().resolve()),
+                "--review-dir",
+                str(Path(args.review_dir).expanduser().resolve()),
             ]
         )
         return command

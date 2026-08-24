@@ -104,6 +104,35 @@ def _(role_input, rubric_for_role):
 
 
 @app.cell
+def _(ReviewerRole, mo, role_input):
+    if role_input.value == ReviewerRole.AUTHOR_VALIDATION.value:
+        review_mode_view = mo.callout(
+            mo.md(
+                "**Author-validation mode:** use this to challenge the instruction, oracle, "
+                "fixtures, and verifier before handoff. This record cannot approve the task."
+            ),
+            kind="warn",
+        )
+    elif role_input.value == ReviewerRole.FINAL_APPROVER.value:
+        review_mode_view = mo.callout(
+            mo.md(
+                "**Final-approval mode:** confirm that independent domain and technical "
+                "findings are resolved before accepting the task into the benchmark."
+            ),
+            kind="info",
+        )
+    else:
+        review_mode_view = mo.callout(
+            mo.md(
+                "**Independent-review mode:** assess the task rather than the author, cite "
+                "task evidence, and disclose any relationship that could affect judgment."
+            ),
+            kind="info",
+        )
+    return (review_mode_view,)
+
+
+@app.cell
 def _(RubricStatus, active_rubric, mo):
     assessment_editor = mo.ui.data_editor(
         [
@@ -245,6 +274,28 @@ def _(
 
 
 @app.cell
+def _(mo, saved_review_path, task_bundle, task_review_store):
+    prior_reviews = task_review_store.list(task_name=task_bundle.task_name)
+    review_history_view = (
+        mo.ui.table(
+            [
+                {
+                    "Reviewer": item.reviewer,
+                    "Role": item.reviewer_role.value.replace("_", " ").title(),
+                    "Decision": item.verdict.value.replace("_", " ").title(),
+                    "Updated": item.updated_at,
+                }
+                for item in prior_reviews
+            ],
+            selection=None,
+        )
+        if prior_reviews
+        else mo.md("No task-review sidecars have been recorded yet.")
+    )
+    return prior_reviews, review_history_view
+
+
+@app.cell
 def _(mo, task_bundle):
     metadata = task_bundle.config.get("metadata") or {}
     task_overview = mo.vstack(
@@ -328,6 +379,8 @@ def _(
     mo,
     review_directory,
     review_note_input,
+    review_history_view,
+    review_mode_view,
     reviewer_input,
     role_input,
     save_error,
@@ -368,6 +421,9 @@ def _(
             reviewer_input,
             role_input,
             conflict_input,
+            review_mode_view,
+            mo.md("### Prior reviews"),
+            review_history_view,
             mo.md("## Rubric assessment"),
             assessment_editor,
             mo.md("## Decision"),

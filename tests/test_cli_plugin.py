@@ -134,6 +134,23 @@ class CliTests(unittest.TestCase):
         self.assertIn("--draft-dir", command)
         self.assertIn("--output-dir", command)
 
+    def test_review_task_command_opens_independent_review_app(self):
+        args = SimpleNamespace(
+            command="review-task",
+            task="outputs/harbor-tasks/posterior-check",
+            review_dir="outputs/task-reviews",
+            port=2722,
+            host="127.0.0.1",
+            headless=True,
+            token=False,
+        )
+
+        command = marimo_command(args)
+
+        self.assertEqual(Path(command[command.index("--") - 1]).name, "task_review.py")
+        self.assertIn("--task", command)
+        self.assertIn("--review-dir", command)
+
 
 class PluginTests(unittest.TestCase):
     def test_plugin_exports_without_starting_a_server(self):
