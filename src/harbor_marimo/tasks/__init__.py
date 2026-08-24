@@ -1,6 +1,7 @@
 """Harbor-compatible scientific benchmark task authoring."""
 
 from .artifacts import ArtifactIssue, inspect_artifact_contract
+from .generator import generate_verifier_script
 from .models import (
     ArtifactContract,
     ArtifactField,
@@ -33,4 +34,5 @@ __all__ = [
     "VerifierFixture",
     "evaluate_check",
     "evaluate_checks",
+    "generate_verifier_script",
 ]
