@@ -1,17 +1,16 @@
-# Harbor-Marimo with Acto expert workflows
+# Marimo + Harbor
 
 `harbor-marimo` turns [Harbor](https://harborframework.com/) jobs and
 [ATIF](https://harborframework.com/docs/agents/trajectory-format) trajectories into
 reactive, reproducible [Marimo](https://marimo.io/) analysis workspaces.
 
-The repository also packages `acto`, the domain-expert application layer for task
-authoring, independent task review, and agent-result grading. Marimo supplies the reactive
-application runtime; Harbor supplies the external task runner and canonical evidence
-formats; Acto supplies the expert workflows and domain interpretation.
-
 It is the programmable analysis layer beside Harbor's operational viewer: use Harbor to
 run and monitor evaluations; use `harbor-marimo` when an investigation needs custom
 comparisons, domain evidence, or a notebook that can be reviewed and rerun.
+
+The [`acto`](src/acto) folder uses this integration to demonstrate domain-expert
+workflows. An example Task Studio is included for creating benchmark tasks, acceptance
+criteria, verifiers, and test fixtures.
 
 `harbor-marimo` is in active development. It is currently an alpha source package and is
 not yet published to PyPI or listed as an official Harbor community integration.
@@ -26,11 +25,9 @@ not yet published to PyPI or listed as an official Harbor community integration.
 - Opens a generic Marimo workspace for comparisons and evidence inspection.
 - Provides a small Harbor plugin that prints the analysis handoff and can export tables
   after a job.
-- Provides Acto financial and scientific result-review applications with durable,
-  evidence-linked sidecars.
-- Provides Acto Task Studio, which exports Terminal-Bench Science drafts as standard Harbor
-  tasks with declarative, fixture-tested verifiers.
-- Provides Acto Task Review for independent benchmark-item approval.
+- Includes scientific and financial Acto examples with evidence-linked result reviews.
+- Includes an example Acto Task Studio and independent Task Review workflow that export
+  standard Harbor tasks with declarative, fixture-tested verifiers.
 
 ## Quick start from this repository
 
@@ -147,22 +144,36 @@ contract.
 Cloud execution remains a Harbor concern. See [cloud sandbox compatibility](docs/cloud-sandboxes.md)
 for the opt-in CoreWeave installation and the downstream artifact handoff.
 
-## Domain example
+## Examples
 
-A financial-review proof of concept remains available as a domain application:
+The [`acto`](src/acto) folder uses the Harbor-Marimo integration to demonstrate
+domain-expert workflows.
 
-```bash
-uv run marimo run src/acto/apps/expert_review.py --port 2718
-```
+- **Scientific:** An example Task Studio supports creating benchmark tasks, acceptance
+  criteria, verifiers, and fixtures. The scientific applications also demonstrate
+  independent task review, convergence signals, trial comparison, and persisted expert
+  judgments.
 
-It adds workbook-specific review semantics on top of Harbor trials. See the
-[domain example documentation](examples/financial-review/README.md).
+  ```bash
+  uv run acto studio examples/science-task-authoring/draft.json --port 2722
+  ```
 
-The [scientific review example](examples/science-review/README.md) demonstrates bounded
-artifact previews, convergence signals, trial comparison, and persisted expert judgments.
-See the [architecture](docs/architecture.md), [Acto package](docs/acto-package.md), and
-[review record](docs/expert-reviews.md) documentation for package responsibilities and the
-persistence contract.
+  See the [task-authoring](examples/science-task-authoring/README.md) and
+  [scientific review](examples/science-review/README.md) examples.
+
+- **Financial:** An example result-review application adds workbook-specific evidence and
+  expert judgments to Harbor trials.
+
+  ```bash
+  uv run acto review-results examples/financial-review/demo_data/harbor_job \
+    --domain financial --port 2718
+  ```
+
+  See the [financial review documentation](examples/financial-review/README.md).
+
+See the [architecture](docs/architecture.md) and
+[review-record documentation](docs/expert-reviews.md) for package responsibilities and
+persistence details.
 
 ## Design
 
@@ -177,7 +188,7 @@ normalized evidence tables + retained raw payloads
         |
         +--> Python API / JSON export
         +--> generic Marimo analysis workspace
-        +--> Acto task and review applications
+        +--> Acto example task and review applications
                          |
                          v
                 external review sidecars
