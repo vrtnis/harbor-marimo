@@ -1,6 +1,6 @@
 import unittest
 
-from harbor_marimo.task_reviews import (
+from acto.task_reviews import (
     ReviewerRole,
     RubricAssessment,
     RubricStatus,

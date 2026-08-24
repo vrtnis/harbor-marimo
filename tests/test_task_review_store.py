@@ -1,7 +1,7 @@
 import tempfile
 import unittest
 
-from harbor_marimo.task_reviews import TaskReview, TaskReviewStore
+from acto.task_reviews import TaskReview, TaskReviewStore
 
 
 class TaskReviewStoreTests(unittest.TestCase):
