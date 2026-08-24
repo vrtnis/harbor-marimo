@@ -2,6 +2,7 @@
 
 from .artifacts import ArtifactIssue, inspect_artifact_contract
 from .generator import generate_verifier_script
+from .export import TaskBundleExport, export_task_bundle, review_profile_payload
 from .fixtures import FixtureResult, evaluate_fixture, evaluate_fixtures
 from .models import (
     ArtifactContract,
@@ -40,6 +41,7 @@ __all__ = [
     "ScientificBrief",
     "TaskDraft",
     "TaskDraftStore",
+    "TaskBundleExport",
     "task_template_root",
     "inspect_artifact_contract",
     "TaskMetadata",
@@ -49,7 +51,9 @@ __all__ = [
     "evaluate_checks",
     "evaluate_fixture",
     "evaluate_fixtures",
+    "export_task_bundle",
     "generate_verifier_script",
     "harbor_validation_plan",
     "run_harbor_validation",
+    "review_profile_payload",
 ]
