@@ -5,7 +5,7 @@ contains a converged and a non-converged model-fitting trial with collected summ
 verifier diagnostics. It is an interface fixture, not a Terminal-Bench Science task.
 
 ```bash
-uv run harbor-marimo review examples/science-review/demo_data/harbor_job \
+uv run acto review-results examples/science-review/demo_data/harbor_job \
   --domain science \
   --profile examples/science-review/review_profile.json \
   --guided \

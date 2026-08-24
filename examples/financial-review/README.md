@@ -9,12 +9,13 @@ From the repository root:
 
 ```bash
 uv sync --all-extras
-uv run marimo run src/harbor_marimo/apps/expert_review.py --port 2718
+uv run acto review-results examples/financial-review/demo_data/harbor_job \
+  --domain financial --port 2718
 ```
 
 The packaged expert app loads the example fixtures from this directory:
 
-- `../../src/harbor_marimo/apps/expert_review.py` — domain-specific Marimo application
+- `../../src/acto/apps/expert_review.py` — Acto financial-review Marimo application
 - `demo_data/harbor_job/` — synthetic Harbor job with three trials
 - `scripts/build_workbooks.mjs` — deterministic workbook fixture builder
 

@@ -1,8 +1,13 @@
-# Marimo + Harbor
+# Harbor-Marimo with Acto expert workflows
 
 `harbor-marimo` turns [Harbor](https://harborframework.com/) jobs and
 [ATIF](https://harborframework.com/docs/agents/trajectory-format) trajectories into
 reactive, reproducible [Marimo](https://marimo.io/) analysis workspaces.
+
+The repository also packages `acto`, the domain-expert application layer for task
+authoring, independent task review, and agent-result grading. Marimo supplies the reactive
+application runtime; Harbor supplies the external task runner and canonical evidence
+formats; Acto supplies the expert workflows and domain interpretation.
 
 It is the programmable analysis layer beside Harbor's operational viewer: use Harbor to
 run and monitor evaluations; use `harbor-marimo` when an investigation needs custom
@@ -21,10 +26,11 @@ not yet published to PyPI or listed as an official Harbor community integration.
 - Opens a generic Marimo workspace for comparisons and evidence inspection.
 - Provides a small Harbor plugin that prints the analysis handoff and can export tables
   after a job.
-- Provides financial and scientific expert-review applications with durable evidence-linked
-  sidecars.
-- Provides a non-coder Task Studio that exports Terminal-Bench Science drafts as standard
-  Harbor tasks with declarative, fixture-tested verifiers.
+- Provides Acto financial and scientific result-review applications with durable,
+  evidence-linked sidecars.
+- Provides Acto Task Studio, which exports Terminal-Bench Science drafts as standard Harbor
+  tasks with declarative, fixture-tested verifiers.
+- Provides Acto Task Review for independent benchmark-item approval.
 
 ## Quick start from this repository
 
@@ -57,7 +63,7 @@ uv run harbor-marimo export examples/financial-review/demo_data/harbor_job -o ou
 Open the expert workflow and persist judgments as sidecars:
 
 ```bash
-uv run harbor-marimo review examples/financial-review/demo_data/harbor_job \
+uv run acto review-results examples/financial-review/demo_data/harbor_job \
   --domain financial \
   --review-dir outputs/reviews
 ```
@@ -65,16 +71,16 @@ uv run harbor-marimo review examples/financial-review/demo_data/harbor_job \
 Author a scientific benchmark task from the included synthetic draft:
 
 ```bash
-uv run harbor-marimo author examples/science-task-authoring/draft.json --port 2722
+uv run acto studio examples/science-task-authoring/draft.json --port 2722
 ```
 
 See the [domain-expert task-authoring workflow](docs/task-authoring.md) for verifier
-fixtures, Harbor export, oracle/nop validation, and CoreWeave handoff boundaries.
+fixtures, Harbor export, oracle/nop validation, and CoreWeave handoff responsibilities.
 
 Independently review the exported benchmark task itself:
 
 ```bash
-uv run harbor-marimo review-task \
+uv run acto review-task \
   examples/science-task-review/bayesian-posterior-convergence \
   --review-dir outputs/task-reviews
 ```
@@ -146,7 +152,7 @@ for the opt-in CoreWeave installation and the downstream artifact handoff.
 A financial-review proof of concept remains available as a domain application:
 
 ```bash
-uv run marimo run src/harbor_marimo/apps/expert_review.py --port 2718
+uv run marimo run src/acto/apps/expert_review.py --port 2718
 ```
 
 It adds workbook-specific review semantics on top of Harbor trials. See the
@@ -154,8 +160,9 @@ It adds workbook-specific review semantics on top of Harbor trials. See the
 
 The [scientific review example](examples/science-review/README.md) demonstrates bounded
 artifact previews, convergence signals, trial comparison, and persisted expert judgments.
-See the [architecture](docs/architecture.md) and [review record](docs/expert-reviews.md)
-documentation for the extension boundaries and persistence contract.
+See the [architecture](docs/architecture.md), [Acto package](docs/acto-package.md), and
+[review record](docs/expert-reviews.md) documentation for package responsibilities and the
+persistence contract.
 
 ## Design
 
@@ -163,14 +170,14 @@ documentation for the extension boundaries and persistence contract.
 Harbor job directories
         |
         v
-tolerant read-only loader + path boundary
+tolerant read-only loader + path-safety checks
         |
         v
 normalized evidence tables + retained raw payloads
         |
         +--> Python API / JSON export
         +--> generic Marimo analysis workspace
-        +--> financial/science domain applications
+        +--> Acto task and review applications
                          |
                          v
                 external review sidecars
@@ -186,8 +193,10 @@ verifier output, or final job results become diagnostics instead of crashing the
 uv sync --extra domain --extra plugin
 uv run python -m unittest discover -s tests -v
 uv run marimo check src/harbor_marimo/apps/analysis.py \
-  src/harbor_marimo/apps/expert_review.py \
-  src/harbor_marimo/apps/science_review.py
+  src/acto/apps/expert_review.py \
+  src/acto/apps/science_review.py \
+  src/acto/apps/task_studio.py \
+  src/acto/apps/task_review.py
 uv build
 ```
 

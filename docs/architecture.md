@@ -1,6 +1,7 @@
 # Architecture
 
-`harbor-marimo` is a read-only analysis and expert-review layer over Harbor output.
+`harbor-marimo` is the read-only analysis integration over Harbor output. The `acto`
+package adds task authoring and expert review applications to that generic evidence layer.
 
 The domain-expert applications are organized as the separate `acto` package inside this
 repository. See [Acto package structure](acto-package.md) for the package responsibilities
@@ -28,16 +29,16 @@ Harbor execution (Docker or cloud sandbox)
                  external review sidecars
 ```
 
-## Package boundaries
+## Package responsibilities
 
 - `loader.py`, `models.py`, and `normalize.py` understand Harbor and ATIF evidence, not
   finance or science semantics.
-- `domains/` interprets artifacts and checks for a particular expert audience. Domain
+- `acto/domains/` interprets artifacts and checks for a particular expert audience. Domain
   checks do not replace Harbor verifier rewards.
-- `reviews/` owns versioned judgments and evidence references. Its JSON store writes
+- `acto/reviews/` owns versioned judgments and evidence references. Its JSON store writes
   outside the Harbor job directory.
-- `apps/` contains installable Marimo notebooks. The CLI selects an app without changing
-  the underlying job.
+- `acto/apps/` contains the Task Studio, Task Review, and result-review Marimo applications.
+- `harbor_marimo/apps/analysis.py` remains the generic evidence-analysis application.
 - `plugin.py` is an optional, non-fatal handoff from Harbor. It never starts a long-lived
   Marimo server inside a worker process.
 

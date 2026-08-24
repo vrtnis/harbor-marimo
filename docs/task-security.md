@@ -1,6 +1,6 @@
-# Task-authoring security and collaboration boundaries
+# Task-authoring security and collaboration responsibilities
 
-## Trust boundary
+## Trust model
 
 Task instructions, artifacts, oracle scripts, verifier code, and Dockerfiles are untrusted
 benchmark inputs. The Marimo authoring and task-review apps display or structurally inspect
@@ -13,7 +13,7 @@ The generated verifier executes later in Harbor's separate verifier environment.
 nop, agent, container, and cloud-sandbox execution occurs only through Harbor and only after
 the user explicitly selects **Run Harbor validation** or passes `validate-task --run`.
 
-## Ownership boundary
+## Ownership responsibilities
 
 - Task Studio owns versioned draft sidecars and deterministic bundle generation.
 - Harbor owns task execution, sandbox selection, credentials, resource lifecycle, artifact
@@ -27,7 +27,7 @@ Neither review app mutates the canonical task or Harbor job. Publishing a task, 
 into a benchmark dataset, granting reviewers access, and resolving organizational conflicts
 remain benchmark-governance responsibilities outside this local repository.
 
-## Collaboration boundary
+## Collaboration responsibilities
 
 Task authors may revise in response to review, but prior sidecars remain part of the audit
 trail. Domain and technical review should be performed by people with appropriate expertise

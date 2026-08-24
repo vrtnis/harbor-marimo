@@ -19,7 +19,7 @@ have a declared conflict.
 Open the included task:
 
 ```bash
-uv run harbor-marimo review-task \
+uv run acto review-task \
   examples/science-task-review/bayesian-posterior-convergence \
   --review-dir outputs/task-reviews \
   --port 2722
@@ -34,7 +34,7 @@ After Harbor runs agents against an approved task, reuse its exported criteria i
 review:
 
 ```bash
-uv run harbor-marimo review outputs/jobs/example-job \
+uv run acto review-results outputs/jobs/example-job \
   --domain science \
   --task outputs/harbor-tasks/bayesian-posterior-convergence \
   --review-dir outputs/result-reviews

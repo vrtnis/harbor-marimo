@@ -6,11 +6,11 @@ oracle path. The files demonstrate the authoring contract; the placeholder oracl
 adapted to the final Harbor task environment before production use.
 
 ```bash
-uv run harbor-marimo author examples/science-task-authoring/draft.json --port 2722
-uv run harbor-marimo verifier examples/science-task-authoring/draft.json
-uv run harbor-marimo export-task examples/science-task-authoring/draft.json \
+uv run acto studio examples/science-task-authoring/draft.json --port 2722
+uv run acto test-verifier examples/science-task-authoring/draft.json
+uv run acto export-task examples/science-task-authoring/draft.json \
   --output outputs/harbor-tasks/bayesian-posterior-convergence
-uv run harbor-marimo validate-task \
+uv run acto validate-task \
   outputs/harbor-tasks/bayesian-posterior-convergence --env docker
 ```
 

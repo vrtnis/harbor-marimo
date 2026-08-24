@@ -16,7 +16,7 @@ it does not replace Harbor's task runner or sandbox providers.
 Start with the included synthetic example:
 
 ```bash
-uv run harbor-marimo author examples/science-task-authoring/draft.json --port 2722
+uv run acto studio examples/science-task-authoring/draft.json --port 2722
 ```
 
 Task Studio writes drafts only after **Save draft revision** is selected and runs Harbor only
@@ -26,10 +26,10 @@ existing task directory.
 ## CLI workflow
 
 ```bash
-uv run harbor-marimo verifier examples/science-task-authoring/draft.json
-uv run harbor-marimo export-task examples/science-task-authoring/draft.json \
+uv run acto test-verifier examples/science-task-authoring/draft.json
+uv run acto export-task examples/science-task-authoring/draft.json \
   --output outputs/harbor-tasks/bayesian-posterior-convergence
-uv run harbor-marimo validate-task \
+uv run acto validate-task \
   outputs/harbor-tasks/bayesian-posterior-convergence --env docker
 ```
 
@@ -37,7 +37,7 @@ uv run harbor-marimo validate-task \
 CoreWeave environment, select it in Task Studio or use `--env cwsandbox`; sandbox creation,
 credentials, task execution, and result collection remain downstream Harbor responsibilities.
 
-## Outputs and boundaries
+## Outputs and responsibilities
 
 - The exported directory follows Harbor's task layout and contains `task.toml`,
   `instruction.md`, `environment/`, `solution/`, and `tests/`.
@@ -50,4 +50,4 @@ credentials, task execution, and result collection remain downstream Harbor resp
   authors may test their own oracle, but author validation is not independent approval.
 
 Continue with the [independent task-review workflow](task-review.md) and review the
-[security and collaboration boundaries](task-security.md) before benchmark publication.
+[security and collaboration responsibilities](task-security.md) before benchmark publication.

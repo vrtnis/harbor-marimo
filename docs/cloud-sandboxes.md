@@ -30,7 +30,7 @@ remote sandbox and does not keep a web server alive in the Harbor worker. When H
 finishes downloading the trial output, the plugin prints the local analysis handoff.
 
 ```bash
-uv run harbor-marimo review <local-job-directory> \
+uv run acto review-results <local-job-directory> \
   --domain science \
   --review-dir outputs/reviews
 ```

@@ -4,8 +4,8 @@ Expert reviews are independent judgments linked to Harbor evidence. They are not
 rewards and do not rewrite `result.json`, `trajectory.json`, manifests, or artifacts.
 
 ```bash
-harbor-marimo review <job> --domain financial --review-dir outputs/reviews
-harbor-marimo review <job> --domain science --review-dir outputs/reviews
+acto review-results <job> --domain financial --review-dir outputs/reviews
+acto review-results <job> --domain science --review-dir outputs/reviews
 ```
 
 For a domain-expert science workflow, supply an optional presentation profile. The profile
@@ -13,7 +13,7 @@ adds the scientific question, acceptance criteria, artifact labels, guidance, an
 without changing the Harbor job:
 
 ```bash
-harbor-marimo review <job> --domain science \
+acto review-results <job> --domain science \
   --profile examples/science-review/review_profile.json \
   --review-dir outputs/reviews
 ```

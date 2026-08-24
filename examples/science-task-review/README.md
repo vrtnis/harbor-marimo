@@ -5,7 +5,7 @@ draft in `../science-task-authoring`. It exists so an independent reviewer can o
 complete task without first generating local output:
 
 ```bash
-uv run harbor-marimo review-task \
+uv run acto review-task \
   examples/science-task-review/bayesian-posterior-convergence --port 2722
 ```
 
