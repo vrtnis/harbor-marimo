@@ -15,6 +15,7 @@ from .conflicts import (
     reviewer_assignment_issues,
     validate_task_review,
 )
+from .loader import TaskBundle, TaskFile, load_task_bundle, read_task_evidence
 
 __all__ = [
     "TASK_REVIEW_SCHEMA",
@@ -23,9 +24,13 @@ __all__ = [
     "RubricAssessment",
     "RubricStatus",
     "TaskEvidenceReference",
+    "TaskBundle",
+    "TaskFile",
     "TaskReview",
     "TaskReviewVerdict",
     "enforce_task_review",
     "reviewer_assignment_issues",
     "validate_task_review",
+    "load_task_bundle",
+    "read_task_evidence",
 ]
