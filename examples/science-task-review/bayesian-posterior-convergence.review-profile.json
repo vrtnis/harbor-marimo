@@ -1,0 +1,49 @@
+{
+  "acceptance_criteria": [
+    {
+      "evidence_keys": ["results/posterior_summary.csv"],
+      "guidance": "Confirm that the reported parameters and diagnostics are appropriate for the fitted model.",
+      "id": "posterior-columns",
+      "label": "The posterior summary has the required scientific diagnostics"
+    },
+    {
+      "evidence_keys": ["results/posterior_summary.csv"],
+      "guidance": "Consider whether R-hat is sufficient for this model and sampling geometry.",
+      "id": "rhat-converged",
+      "label": "Every sampling chain satisfies the R-hat convergence threshold"
+    },
+    {
+      "evidence_keys": ["results/posterior_summary.csv"],
+      "guidance": "Assess whether the chosen ESS threshold is scientifically adequate for downstream use.",
+      "id": "ess-adequate",
+      "label": "Every parameter has adequate effective sample size"
+    },
+    {
+      "evidence_keys": ["results/convergence.json"],
+      "guidance": "Cross-check the overall claim against the parameter-level diagnostics.",
+      "id": "reported-convergence",
+      "label": "The agent reports an overall converged result"
+    }
+  ],
+  "artifact_labels": {
+    "results/convergence.json": {
+      "description": "Machine-readable convergence conclusion.",
+      "guidance": "Use this artifact when assessing the linked acceptance criteria.",
+      "label": "Convergence"
+    },
+    "results/posterior_summary.csv": {
+      "description": "Posterior estimates and sampling diagnostics for every model parameter.",
+      "guidance": "Use this artifact when assessing the linked acceptance criteria.",
+      "label": "Posterior Summary"
+    }
+  },
+  "benchmark": {
+    "domain": "mathematical-sciences",
+    "field": "statistics",
+    "subfield": "Bayesian inference",
+    "task_name": "bayesian-posterior-convergence"
+  },
+  "question": "Fit the supplied Bayesian model and report posterior estimates with convergence diagnostics.",
+  "summary": "Reliable convergence assessment is necessary before posterior estimates can support a scientific conclusion.",
+  "title": "Assess Bayesian posterior convergence"
+}
