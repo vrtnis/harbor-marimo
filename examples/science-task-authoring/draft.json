@@ -1,0 +1,113 @@
+{
+  "agent_timeout_sec": 1800,
+  "allow_internet": false,
+  "artifacts": [
+    {
+      "description": "Posterior estimates and sampling diagnostics for every model parameter.",
+      "fields": [
+        {"data_type": "string", "description": "Model parameter", "name": "parameter", "required": true},
+        {"data_type": "number", "description": "Posterior mean", "name": "mean", "required": true},
+        {"data_type": "number", "description": "Potential scale reduction statistic", "name": "r_hat", "required": true},
+        {"data_type": "number", "description": "Effective sample size", "name": "ess", "required": true}
+      ],
+      "format": "csv",
+      "path": "results/posterior_summary.csv",
+      "required": true
+    },
+    {
+      "description": "Machine-readable convergence conclusion.",
+      "fields": [
+        {"data_type": "string", "description": "Overall convergence state", "name": "status", "required": true}
+      ],
+      "format": "json",
+      "path": "results/convergence.json",
+      "required": true
+    }
+  ],
+  "brief": {
+    "difficulty_explanation": "The agent must fit a probabilistic model, distinguish numerical output from scientifically defensible convergence, and leave auditable diagnostics.",
+    "instruction": "Fit the supplied Bayesian model and report posterior estimates. Create results/posterior_summary.csv with parameter, mean, r_hat, and ess columns, and results/convergence.json with an overall status. Report converged only when every R-hat is at most 1.01 and every effective sample size is at least 400.",
+    "research_context": "Reliable convergence assessment is necessary before posterior estimates can support a scientific conclusion. This task tests whether an agent can produce both a result and the diagnostic evidence needed to trust it.",
+    "solution_explanation": "Run the supplied model with multiple chains, compute posterior summaries, and derive the overall convergence state from all parameter-level diagnostics.",
+    "title": "Assess Bayesian posterior convergence",
+    "verification_explanation": "The verifier checks the result schema, numerical convergence thresholds, and consistency of the reported overall status. Independent review still assesses scientific adequacy."
+  },
+  "build_timeout_sec": 600,
+  "checks": [
+    {
+      "artifact": "results/posterior_summary.csv",
+      "description": "The posterior summary has the required scientific diagnostics",
+      "expert_guidance": "Confirm that the reported parameters and diagnostics are appropriate for the fitted model.",
+      "expert_only": false,
+      "id": "posterior-columns",
+      "parameters": {"columns": ["parameter", "mean", "r_hat", "ess"]},
+      "type": "csv_columns"
+    },
+    {
+      "artifact": "results/posterior_summary.csv",
+      "description": "Every sampling chain satisfies the R-hat convergence threshold",
+      "expert_guidance": "Consider whether R-hat is sufficient for this model and sampling geometry.",
+      "expert_only": false,
+      "id": "rhat-converged",
+      "parameters": {"column": "r_hat", "value": 1.01},
+      "type": "column_max"
+    },
+    {
+      "artifact": "results/posterior_summary.csv",
+      "description": "Every parameter has adequate effective sample size",
+      "expert_guidance": "Assess whether the chosen ESS threshold is scientifically adequate for downstream use.",
+      "expert_only": false,
+      "id": "ess-adequate",
+      "parameters": {"column": "ess", "value": 400},
+      "type": "column_min"
+    },
+    {
+      "artifact": "results/convergence.json",
+      "description": "The agent reports an overall converged result",
+      "expert_guidance": "Cross-check the overall claim against the parameter-level diagnostics.",
+      "expert_only": false,
+      "id": "reported-convergence",
+      "parameters": {"field": "status", "value": "converged"},
+      "type": "json_equals"
+    }
+  ],
+  "cpus": 2,
+  "created_at": "2026-08-23T00:00:00Z",
+  "draft_id": "terminal-bench-science-posterior-convergence",
+  "fixtures": [
+    {
+      "expected_pass": true,
+      "explanation": "All chains meet the stated R-hat and ESS thresholds.",
+      "name": "Known converged posterior",
+      "source": "valid_output"
+    },
+    {
+      "expected_pass": false,
+      "explanation": "One parameter has high R-hat and low ESS, despite a converged claim.",
+      "name": "Known non-converged posterior",
+      "source": "invalid_outputs/nonconverged"
+    }
+  ],
+  "gpus": 0,
+  "memory_mb": 4096,
+  "metadata": {
+    "author_email": "",
+    "author_name": "Terminal-Bench Science example author",
+    "author_organization": "",
+    "author_profile": "Bayesian modeling and statistical diagnostics",
+    "conflicts_of_interest": "None",
+    "domain": "mathematical-sciences",
+    "expert_time_estimate_hours": 4,
+    "field": "statistics",
+    "relevant_experience": "Design and review of Bayesian analyses.",
+    "research_advisor": "",
+    "subfield": "Bayesian inference",
+    "tags": ["bayesian", "convergence", "scientific-evaluation"]
+  },
+  "oracle_path": "solution/solve.sh",
+  "schema_version": "harbor-marimo/task-draft/v1",
+  "storage_mb": 10240,
+  "task_name": "bayesian-posterior-convergence",
+  "updated_at": "2026-08-23T00:00:00Z",
+  "verifier_timeout_sec": 120
+}

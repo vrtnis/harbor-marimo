@@ -1,0 +1,5 @@
+{
+  "status": "converged",
+  "chains": 4,
+  "draws_per_chain": 1000
+}

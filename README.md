@@ -23,6 +23,8 @@ not yet published to PyPI or listed as an official Harbor community integration.
   after a job.
 - Provides financial and scientific expert-review applications with durable evidence-linked
   sidecars.
+- Provides a non-coder Task Studio that exports Terminal-Bench Science drafts as standard
+  Harbor tasks with declarative, fixture-tested verifiers.
 
 ## Quick start from this repository
 
@@ -59,6 +61,15 @@ uv run harbor-marimo review examples/financial-review/demo_data/harbor_job \
   --domain financial \
   --review-dir outputs/reviews
 ```
+
+Author a scientific benchmark task from the included synthetic draft:
+
+```bash
+uv run harbor-marimo author examples/science-task-authoring/draft.json --port 2722
+```
+
+See the [domain-expert task-authoring workflow](docs/task-authoring.md) for verifier
+fixtures, Harbor export, oracle/nop validation, and CoreWeave handoff boundaries.
 
 Add `--include-raw` only when the downstream consumer needs complete original payloads.
 Exports retain source provenance and can contain absolute local paths. Keep local exports

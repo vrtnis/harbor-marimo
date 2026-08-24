@@ -1,0 +1,4 @@
+parameter,mean,r_hat,ess
+intercept,0.42,1.001,1800
+slope,1.37,1.004,1250
+sigma,0.81,1.003,980
