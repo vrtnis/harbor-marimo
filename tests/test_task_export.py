@@ -3,8 +3,8 @@ import tempfile
 import tomllib
 import unittest
 
-from harbor_marimo.profiles import load_review_profile
-from harbor_marimo.tasks import (
+from acto.profiles import load_review_profile
+from acto.tasks import (
     ArtifactContract,
     ScientificBrief,
     TaskDraft,

@@ -2,7 +2,7 @@ from pathlib import Path
 import tempfile
 import unittest
 
-from harbor_marimo.tasks import VerifierCheck, evaluate_checks
+from acto.tasks import VerifierCheck, evaluate_checks
 
 
 class DeclarativeVerifierTests(unittest.TestCase):
