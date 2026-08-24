@@ -202,7 +202,12 @@ def marimo_command(args: argparse.Namespace) -> list[str]:
         app_name = "task_studio.py"
     elif args.command == "review-task":
         app_name = "task_review.py"
-    app_path = Path(__file__).with_name("apps").joinpath(app_name).resolve()
+    if args.command == "author":
+        import acto
+
+        app_path = Path(acto.__file__).with_name("apps").joinpath(app_name).resolve()
+    else:
+        app_path = Path(__file__).with_name("apps").joinpath(app_name).resolve()
     marimo_mode = "edit" if args.command == "edit" else "run"
     command = [sys.executable, "-m", "marimo", marimo_mode]
     if args.port is not None:

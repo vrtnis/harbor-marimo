@@ -130,6 +130,7 @@ class CliTests(unittest.TestCase):
         command = marimo_command(args)
 
         self.assertEqual(Path(command[command.index("--") - 1]).name, "task_studio.py")
+        self.assertEqual(Path(command[command.index("--") - 1]).parent.parent.name, "acto")
         self.assertIn("--draft", command)
         self.assertIn("--draft-dir", command)
         self.assertIn("--output-dir", command)

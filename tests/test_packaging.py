@@ -12,6 +12,7 @@ class PackagedAppTests(unittest.TestCase):
         package = Path(acto.__file__).resolve().parent
 
         self.assertTrue((package / "__init__.py").is_file())
+        self.assertTrue((package / "apps" / "task_studio.py").is_file())
         self.assertEqual(acto.__version__, harbor_marimo.__version__)
 
     def test_analysis_and_expert_apps_are_inside_the_package(self):
