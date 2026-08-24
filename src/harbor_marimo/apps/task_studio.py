@@ -17,6 +17,7 @@ def _():
         ScientificBrief,
         TaskDraft,
         TaskMetadata,
+        VerifierCheck,
     )
     from harbor_marimo.ui import authoring_progress_markdown, task_summary_markdown
 
@@ -27,6 +28,7 @@ def _():
         ScientificBrief,
         TaskDraft,
         TaskMetadata,
+        VerifierCheck,
         authoring_progress_markdown,
         json,
         mo,
@@ -305,6 +307,122 @@ def _(artifact_editor, artifact_error, contract_draft, field_editor, mo):
 
 
 @app.cell
+def _(contract_draft, mo):
+    check_seed = [
+        {
+            "id": item.id,
+            "type": item.type,
+            "artifact": item.artifact,
+            "field_or_column": item.parameters.get("field")
+            or item.parameters.get("column")
+            or "",
+            "expected_or_limit": item.parameters.get("value", ""),
+            "required_columns": ", ".join(item.parameters.get("columns") or ()),
+            "criterion": item.description,
+            "expert_guidance": item.expert_guidance,
+            "expert_only": item.expert_only,
+        }
+        for item in contract_draft.checks
+    ] or [
+        {
+            "id": "result-exists",
+            "type": "file_exists",
+            "artifact": (
+                contract_draft.artifacts[0].path
+                if contract_draft.artifacts
+                else "results/answer.csv"
+            ),
+            "field_or_column": "",
+            "expected_or_limit": "",
+            "required_columns": "",
+            "criterion": "The primary scientific result is present",
+            "expert_guidance": "Confirm that the result is meaningful, not merely present.",
+            "expert_only": False,
+        }
+    ]
+    check_editor = mo.ui.data_editor(
+        check_seed,
+        label="Scientific acceptance criteria and automated checks",
+    )
+    return (check_editor,)
+
+
+@app.cell
+def _(VerifierCheck, check_editor, contract_draft, json):
+    verifier_error = None
+    verifier_checks = contract_draft.checks
+    try:
+        built_checks = []
+        for row in list(check_editor.value):
+            check_id = str(row.get("id") or "").strip()
+            if not check_id:
+                continue
+            check_type = str(row.get("type") or "file_exists").strip()
+            parameters = {}
+            detail = str(row.get("field_or_column") or "").strip()
+            raw_value = row.get("expected_or_limit", "")
+            if check_type == "csv_columns":
+                parameters["columns"] = [
+                    value.strip()
+                    for value in str(row.get("required_columns") or "").split(",")
+                    if value.strip()
+                ]
+            elif check_type in {"column_min", "column_max"}:
+                parameters = {"column": detail, "value": float(raw_value)}
+            elif check_type == "json_equals":
+                try:
+                    expected_value = json.loads(str(raw_value))
+                except json.JSONDecodeError:
+                    expected_value = str(raw_value)
+                parameters = {"field": detail, "value": expected_value}
+            built_checks.append(
+                VerifierCheck(
+                    id=check_id,
+                    type=check_type,
+                    artifact=str(row.get("artifact") or "").strip(),
+                    description=str(row.get("criterion") or "").strip(),
+                    expert_guidance=str(row.get("expert_guidance") or "").strip(),
+                    parameters=parameters,
+                    expert_only=bool(row.get("expert_only", False)),
+                )
+            )
+        verifier_checks = tuple(built_checks)
+        verifier_draft = contract_draft.updated(checks=verifier_checks)
+    except (AttributeError, TypeError, ValueError) as exc:
+        verifier_draft = contract_draft
+        verifier_error = str(exc)
+    return verifier_checks, verifier_draft, verifier_error
+
+
+@app.cell
+def _(check_editor, mo, verifier_draft, verifier_error):
+    verifier_error_view = (
+        mo.callout(mo.md(verifier_error), kind="warn")
+        if verifier_error
+        else mo.md("")
+    )
+    verifier_builder_view = mo.vstack(
+        [
+            mo.md("## 3. Build acceptance checks"),
+            mo.md(
+                "Turn each scientific acceptance criterion into an observable test. "
+                "Supported check types are `file_exists`, `csv_columns`, `column_min`, "
+                "`column_max`, and `json_equals`. Mark a criterion as expert-only when "
+                "scientific judgment cannot be reduced to a threshold."
+            ),
+            check_editor,
+            verifier_error_view,
+            mo.callout(
+                mo.md(f"**{len(verifier_draft.checks)} acceptance check(s) defined.**"),
+                kind="success" if verifier_draft.checks else "warn",
+            ),
+        ],
+        gap=1,
+    )
+    return (verifier_builder_view,)
+
+
+@app.cell
 def _(
     author_input,
     conflicts_input,
@@ -352,6 +470,8 @@ def _(
     draft_error,
     mo,
     task_summary_markdown,
+    verifier_builder_view,
+    verifier_draft,
 ):
     error_view = (
         mo.callout(mo.md(draft_error), kind="warn") if draft_error else mo.md("")
@@ -376,7 +496,7 @@ def _(
                         mo.md(authoring_progress_markdown(int(active_step.value))),
                         kind="neutral",
                     ),
-                    mo.md(task_summary_markdown(authored_draft)),
+                    mo.md(task_summary_markdown(verifier_draft)),
                 ],
                 widths=[1, 2],
                 align="start",
@@ -384,6 +504,7 @@ def _(
             ),
             brief_form_view,
             artifact_contract_view,
+            verifier_builder_view,
         ],
         gap=2,
     )
