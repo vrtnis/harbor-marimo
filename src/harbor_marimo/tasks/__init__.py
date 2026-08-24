@@ -15,6 +15,12 @@ from .models import (
 from .render import render_instruction, render_task_toml
 from .store import TaskDraftStore
 from .templates import REQUIRED_TASK_FILES, task_template_root
+from .validation import (
+    HarborValidationCommand,
+    HarborValidationRun,
+    harbor_validation_plan,
+    run_harbor_validation,
+)
 from .verifier import CheckResult, evaluate_check, evaluate_checks
 from .workbench import FixtureSuiteReport, run_fixture_workbench
 
@@ -25,6 +31,8 @@ __all__ = [
     "CheckResult",
     "FixtureResult",
     "FixtureSuiteReport",
+    "HarborValidationCommand",
+    "HarborValidationRun",
     "REQUIRED_TASK_FILES",
     "render_instruction",
     "render_task_toml",
@@ -42,4 +50,6 @@ __all__ = [
     "evaluate_fixture",
     "evaluate_fixtures",
     "generate_verifier_script",
+    "harbor_validation_plan",
+    "run_harbor_validation",
 ]
