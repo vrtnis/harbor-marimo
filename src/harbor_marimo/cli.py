@@ -12,9 +12,25 @@ from typing import Sequence
 from . import __version__
 from .export import export_json
 from .loader import load
+from .tasks import (
+    TaskDraft,
+    export_task_bundle,
+    harbor_validation_plan,
+    run_fixture_workbench,
+    run_harbor_validation,
+)
 
 
-_COMMANDS = {"view", "edit", "export", "review"}
+_COMMANDS = {
+    "view",
+    "edit",
+    "export",
+    "review",
+    "author",
+    "verifier",
+    "validate-task",
+    "export-task",
+}
 
 
 def _parser() -> argparse.ArgumentParser:
@@ -90,6 +106,57 @@ def _parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Include raw Harbor and ATIF payloads in addition to normalized tables.",
     )
+
+    author = subparsers.add_parser(
+        "author",
+        help="Open the non-coder Task Studio for a new or existing scientific task.",
+    )
+    author.add_argument("draft", nargs="?", help="Optional task draft JSON path.")
+    author.add_argument("--draft-dir", default="outputs/task-drafts")
+    author.add_argument("--output-dir", default="outputs/harbor-tasks")
+    author.add_argument("--port", type=int, default=None)
+    author.add_argument("--host", default="127.0.0.1")
+    author.add_argument("--headless", action="store_true")
+    author.add_argument(
+        "--token",
+        action=argparse.BooleanOptionalAction,
+        default=None,
+        help="Enable or disable Marimo session authentication.",
+    )
+
+    verifier = subparsers.add_parser(
+        "verifier",
+        help="Test a draft verifier against its known-good and known-bad examples.",
+    )
+    verifier.add_argument("draft", help="Task draft JSON path.")
+    verifier.add_argument(
+        "--root",
+        default=None,
+        help="Folder containing fixture paths; defaults to the draft's folder.",
+    )
+
+    validate = subparsers.add_parser(
+        "validate-task",
+        help="Print or execute the standard Harbor oracle, nop, and agent validations.",
+    )
+    validate.add_argument("task", help="Exported Harbor task directory.")
+    validate.add_argument("--env", dest="environment", default="docker")
+    validate.add_argument("--agent", action="append", default=[])
+    validate.add_argument("--model", action="append", default=[])
+    validate.add_argument("--run", action="store_true", help="Execute instead of only printing commands.")
+    validate.add_argument("--timeout", type=float, default=None)
+
+    export_task = subparsers.add_parser(
+        "export-task",
+        help="Export a task draft as a Harbor-compatible task bundle.",
+    )
+    export_task.add_argument("draft", help="Task draft JSON path.")
+    export_task.add_argument("--output", required=True, help="Destination task directory.")
+    export_task.add_argument(
+        "--root",
+        default=None,
+        help="Folder containing the draft's oracle; defaults to the draft's folder.",
+    )
     return parser
 
 
@@ -109,6 +176,8 @@ def marimo_command(args: argparse.Namespace) -> list[str]:
     app_name = "analysis.py"
     if args.command == "review":
         app_name = "science_review.py" if args.domain == "science" else "expert_review.py"
+    elif args.command == "author":
+        app_name = "task_studio.py"
     app_path = Path(__file__).with_name("apps").joinpath(app_name).resolve()
     marimo_mode = "edit" if args.command == "edit" else "run"
     command = [sys.executable, "-m", "marimo", marimo_mode]
@@ -122,8 +191,21 @@ def marimo_command(args: argparse.Namespace) -> list[str]:
         command.append("--token")
     elif args.token is False:
         command.append("--no-token")
+    command.extend([str(app_path), "--"])
+    if args.command == "author":
+        if args.draft:
+            command.extend(["--draft", str(Path(args.draft).expanduser().resolve())])
+        command.extend(
+            [
+                "--draft-dir",
+                str(Path(args.draft_dir).expanduser().resolve()),
+                "--output-dir",
+                str(Path(args.output_dir).expanduser().resolve()),
+            ]
+        )
+        return command
     sources = [str(Path(value).expanduser().resolve()) for value in args.paths]
-    command.extend([str(app_path), "--", "--jobs-json", json.dumps(sources)])
+    command.extend(["--jobs-json", json.dumps(sources)])
     if args.command == "review":
         command.extend(["--domain", args.domain])
         review_dir = str(Path(args.review_dir).expanduser().resolve())
@@ -149,7 +231,55 @@ def main(argv: Sequence[str] | None = None) -> int:
         )
         print(f"Exported Harbor analysis data to {destination}")
         return 0
+    if args.command == "verifier":
+        draft_path = Path(args.draft).expanduser().resolve()
+        draft = _load_task_draft(draft_path)
+        report = run_fixture_workbench(
+            draft,
+            Path(args.root).expanduser().resolve() if args.root else draft_path.parent,
+        )
+        print(json.dumps({"passed": report.passed, "requirements": report.requirements, "fixtures": report.rows()}, indent=2))
+        return 0 if report.passed else 1
+    if args.command == "export-task":
+        draft_path = Path(args.draft).expanduser().resolve()
+        draft = _load_task_draft(draft_path)
+        result = export_task_bundle(
+            draft,
+            args.output,
+            draft_root=(Path(args.root).expanduser().resolve() if args.root else draft_path.parent),
+        )
+        print(f"Exported Harbor task to {result.task_path}")
+        print(f"Exported result-review profile to {result.review_profile_path}")
+        return 0
+    if args.command == "validate-task":
+        agents = tuple(
+            (agent, args.model[index] if index < len(args.model) else None)
+            for index, agent in enumerate(args.agent)
+        )
+        plan = harbor_validation_plan(
+            args.task,
+            environment=args.environment,
+            agents=agents,
+        )
+        for command in plan:
+            print(" ".join(command.argv))
+        if not args.run:
+            return 0
+        runs = [
+            run_harbor_validation(command, timeout=args.timeout)
+            for command in plan
+        ]
+        for run in runs:
+            print(f"{run.kind}: {'passed' if run.passed else 'failed'}")
+        return 0 if all(run.passed for run in runs) else 1
     return subprocess.call(marimo_command(args))
+
+
+def _load_task_draft(path: Path) -> TaskDraft:
+    value = json.loads(path.read_text(encoding="utf-8"))
+    if not isinstance(value, dict):
+        raise ValueError("Task draft JSON must contain an object.")
+    return TaskDraft.from_dict(value)
 
 
 if __name__ == "__main__":

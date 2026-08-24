@@ -86,6 +86,25 @@ class CliTests(unittest.TestCase):
         self.assertEqual(command[command.index("--guided") + 1], "true")
         self.assertNotIn("--developer", command)
 
+    def test_author_command_opens_task_studio_with_draft(self):
+        args = SimpleNamespace(
+            command="author",
+            draft="examples/science-task-authoring/draft.json",
+            draft_dir="outputs/task-drafts",
+            output_dir="outputs/harbor-tasks",
+            port=2722,
+            host="127.0.0.1",
+            headless=True,
+            token=False,
+        )
+
+        command = marimo_command(args)
+
+        self.assertEqual(Path(command[command.index("--") - 1]).name, "task_studio.py")
+        self.assertIn("--draft", command)
+        self.assertIn("--draft-dir", command)
+        self.assertIn("--output-dir", command)
+
 
 class PluginTests(unittest.TestCase):
     def test_plugin_exports_without_starting_a_server(self):
