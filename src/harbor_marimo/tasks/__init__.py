@@ -2,6 +2,7 @@
 
 from .artifacts import ArtifactIssue, inspect_artifact_contract
 from .generator import generate_verifier_script
+from .fixtures import FixtureResult, evaluate_fixture, evaluate_fixtures
 from .models import (
     ArtifactContract,
     ArtifactField,
@@ -21,6 +22,7 @@ __all__ = [
     "ArtifactField",
     "ArtifactIssue",
     "CheckResult",
+    "FixtureResult",
     "REQUIRED_TASK_FILES",
     "render_instruction",
     "render_task_toml",
@@ -34,5 +36,7 @@ __all__ = [
     "VerifierFixture",
     "evaluate_check",
     "evaluate_checks",
+    "evaluate_fixture",
+    "evaluate_fixtures",
     "generate_verifier_script",
 ]
