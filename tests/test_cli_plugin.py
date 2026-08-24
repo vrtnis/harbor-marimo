@@ -60,6 +60,7 @@ class CliTests(unittest.TestCase):
         command = marimo_command(args)
 
         self.assertEqual(Path(command[command.index("--") - 1]).name, "expert_review.py")
+        self.assertEqual(Path(command[command.index("--") - 1]).parent.parent.name, "acto")
         self.assertEqual(command[command.index("--domain") + 1], "financial")
         self.assertTrue(Path(command[command.index("--review-dir") + 1]).is_absolute())
 
@@ -82,6 +83,7 @@ class CliTests(unittest.TestCase):
         command = marimo_command(args)
 
         self.assertEqual(Path(command[command.index("--") - 1]).name, "science_review.py")
+        self.assertEqual(Path(command[command.index("--") - 1]).parent.parent.name, "acto")
         self.assertIn("--profile", command)
         self.assertIn("--guided", command)
         self.assertEqual(command[command.index("--guided") + 1], "true")
