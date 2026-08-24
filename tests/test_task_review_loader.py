@@ -24,6 +24,10 @@ class TaskReviewLoaderTests(unittest.TestCase):
             self.assertTrue(any(item.path == "tests/test_verifier.py" for item in bundle.files))
             verifier = read_task_evidence(bundle, "tests-test_verifier.py")
             self.assertIn("CHECKS", verifier)
+            evidence_keys = {item.key for item in bundle.evidence()}
+            self.assertIn("instruction", evidence_keys)
+            self.assertIn("solution-solve.sh", evidence_keys)
+            self.assertIn("environment-Dockerfile", evidence_keys)
 
     def test_requires_standard_harbor_task_files(self) -> None:
         with tempfile.TemporaryDirectory() as temp:

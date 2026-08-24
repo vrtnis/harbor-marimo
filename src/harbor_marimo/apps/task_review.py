@@ -18,6 +18,7 @@ def _():
         TaskReviewStore,
         TaskReviewVerdict,
         load_task_bundle,
+        read_task_evidence,
         reviewer_assignment_issues,
         rubric_for_role,
     )
@@ -32,6 +33,7 @@ def _():
         TaskReviewVerdict,
         load_task_bundle,
         mo,
+        read_task_evidence,
         reviewer_assignment_issues,
         rubric_for_role,
     )
@@ -111,6 +113,7 @@ def _(RubricStatus, active_rubric, mo):
                 "review_question": item.question,
                 "status": RubricStatus.UNCERTAIN.value,
                 "reviewer_note": "",
+                "evidence_keys": ", ".join(item.evidence_keys),
             }
             for item in active_rubric
         ],
@@ -165,8 +168,22 @@ def _(
                 criterion_id=str(row.get("criterion_id") or ""),
                 status=RubricStatus(str(row.get("status") or "")),
                 note=str(row.get("reviewer_note") or ""),
+                evidence_keys=tuple(
+                    value.strip()
+                    for value in str(row.get("evidence_keys") or "").split(",")
+                    if value.strip()
+                ),
             )
             for row in list(assessment_editor.value)
+        )
+        evidence_keys = {item.key for item in task_bundle.evidence()}
+        unknown_evidence = sorted(
+            {
+                key
+                for assessment in assessments
+                for key in assessment.evidence_keys
+            }
+            - evidence_keys
         )
         assignment_issues = reviewer_assignment_issues(
             task_author=task_bundle.task_author,
@@ -175,6 +192,12 @@ def _(
             conflict_declaration=conflict_input.value,
             verdict=verdict_input.value,
         )
+        if unknown_evidence:
+            assignment_issues = (
+                *assignment_issues,
+                "Rubric rows reference unavailable task evidence: "
+                + ", ".join(unknown_evidence),
+            )
         if assignment_issues:
             submission_error = " ".join(assignment_issues)
     except (AttributeError, TypeError, ValueError) as exc:
@@ -251,10 +274,56 @@ def _(mo, task_bundle):
 
 
 @app.cell
+def _(mo, task_bundle):
+    evidence_options = {
+        f"{item.label} — {item.path}": item.key for item in task_bundle.evidence()
+    }
+    evidence_picker = mo.ui.dropdown(
+        options=evidence_options,
+        value=next(iter(evidence_options)),
+        label="Inspect task evidence",
+        full_width=True,
+    )
+    return evidence_options, evidence_picker
+
+
+@app.cell
+def _(evidence_picker, mo, read_task_evidence, task_bundle):
+    evidence_preview_error = None
+    try:
+        evidence_preview = read_task_evidence(task_bundle, evidence_picker.value)
+    except (KeyError, FileNotFoundError, OSError, UnicodeError, ValueError) as exc:
+        evidence_preview = ""
+        evidence_preview_error = str(exc)
+    evidence_preview_view = mo.vstack(
+        [
+            evidence_picker,
+            (
+                mo.callout(mo.md(evidence_preview_error), kind="warn")
+                if evidence_preview_error
+                else mo.accordion(
+                    {
+                        "Read-only file content": mo.plain_text(evidence_preview)
+                    }
+                )
+            ),
+            mo.md(
+                "Use the evidence keys shown in the rubric table to cite the instruction, "
+                "verifier, oracle, or environment supporting each finding. Files are read "
+                "as inert text and are never executed by this review app."
+            ),
+        ],
+        gap=1,
+    )
+    return (evidence_preview_view,)
+
+
+@app.cell
 def _(
     assessment_editor,
     bundle_error,
     conflict_input,
+    evidence_preview_view,
     follow_up_input,
     mo,
     review_directory,
@@ -294,6 +363,7 @@ def _(
             task_path_input,
             warning_view,
             task_overview,
+            evidence_preview_view,
             mo.md("## Reviewer assignment"),
             reviewer_input,
             role_input,
