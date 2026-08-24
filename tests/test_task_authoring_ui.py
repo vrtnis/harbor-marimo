@@ -1,13 +1,13 @@
 import unittest
 
-from harbor_marimo.tasks import (
+from acto.tasks import (
     ArtifactContract,
     ScientificBrief,
     TaskDraft,
     TaskMetadata,
     VerifierCheck,
 )
-from harbor_marimo.ui import artifact_rows, draft_readiness, task_summary_markdown
+from acto.ui import artifact_rows, draft_readiness, task_summary_markdown
 
 
 class TaskAuthoringUiTests(unittest.TestCase):

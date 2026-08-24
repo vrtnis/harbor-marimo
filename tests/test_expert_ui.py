@@ -1,6 +1,6 @@
 import unittest
 
-from harbor_marimo.ui import trial_options, validate_review_submission
+from acto.ui import trial_options, validate_review_submission
 
 
 class ExpertUiTests(unittest.TestCase):
