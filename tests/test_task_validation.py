@@ -9,7 +9,7 @@ class HarborTaskValidationTests(unittest.TestCase):
         commands = harbor_validation_plan(
             Path("tasks") / "science-task",
             environment="coreweave",
-            agents=(("codex", "openai/gpt-5.6"),),
+            agents=(("research-agent", "openai/gpt-5.6"),),
         )
 
         self.assertEqual([item.kind for item in commands], ["oracle", "nop", "agent"])

@@ -3,7 +3,7 @@
   "trajectory_id": "traj-forecast-017",
   "session_id": "session-forecast-017",
   "agent": {
-    "name": "codex",
+    "name": "research-agent",
     "version": "0.93.0",
     "model_name": "gpt-5.6"
   },

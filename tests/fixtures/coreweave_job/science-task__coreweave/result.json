@@ -6,14 +6,14 @@
   "task_checksum": "sha256:coreweave-fixture",
   "config": {
     "task": {"path": "tasks/remote-simulation", "source": "recorded-provider-fixture"},
-    "agent": {"name": "codex", "model_name": "gpt-5.6"},
+    "agent": {"name": "research-agent", "model_name": "gpt-5.6"},
     "environment": {
       "type": "cwsandbox",
       "docker_image": "registry.example/science-runtime:2026-08",
       "resources": {"cpu_request": 4, "memory_request": "16Gi", "gpus": 0}
     }
   },
-  "agent_info": {"name": "codex", "model_info": {"name": "gpt-5.6", "provider": "openai"}},
+  "agent_info": {"name": "research-agent", "model_info": {"name": "gpt-5.6", "provider": "openai"}},
   "verifier_result": {"rewards": {"reward": 1.0}},
   "verifier_environment_mode": "separate",
   "started_at": "2026-08-21T12:00:00Z",
