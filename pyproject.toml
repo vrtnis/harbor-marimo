@@ -37,6 +37,7 @@ dev = [
 ]
 
 [project.scripts]
+acto = "acto.cli:main"
 harbor-marimo = "harbor_marimo.cli:main"
 
 [project.entry-points."harbor.plugins"]

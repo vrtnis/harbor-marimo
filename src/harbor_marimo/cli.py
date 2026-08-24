@@ -12,7 +12,7 @@ from typing import Sequence
 from . import __version__
 from .export import export_json
 from .loader import load
-from .tasks import (
+from acto.tasks import (
     TaskDraft,
     export_task_bundle,
     harbor_validation_plan,
