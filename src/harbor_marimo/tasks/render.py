@@ -16,7 +16,7 @@ def render_instruction(draft: TaskDraft) -> str:
         deliverables = ["## Required deliverables"]
         for artifact in draft.artifacts:
             requirement = "required" if artifact.required else "optional"
-            description = f" — {artifact.description}" if artifact.description else ""
+            description = f" -- {artifact.description}" if artifact.description else ""
             deliverables.append(
                 f"- `{artifact.path}` ({artifact.format}, {requirement}){description}"
             )

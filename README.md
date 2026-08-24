@@ -71,6 +71,17 @@ uv run harbor-marimo author examples/science-task-authoring/draft.json --port 27
 See the [domain-expert task-authoring workflow](docs/task-authoring.md) for verifier
 fixtures, Harbor export, oracle/nop validation, and CoreWeave handoff boundaries.
 
+Independently review the exported benchmark task itself:
+
+```bash
+uv run harbor-marimo review-task \
+  examples/science-task-review/bayesian-posterior-convergence \
+  --review-dir outputs/task-reviews
+```
+
+The [task-review lifecycle](docs/task-review.md) separates author validation, domain review,
+technical review, final benchmark approval, and later agent-result grading.
+
 Add `--include-raw` only when the downstream consumer needs complete original payloads.
 Exports retain source provenance and can contain absolute local paths. Keep local exports
 under the ignored `outputs/` directory unless they have been reviewed and sanitized for

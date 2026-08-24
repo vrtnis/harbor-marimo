@@ -39,6 +39,7 @@ class TaskRenderingTests(unittest.TestCase):
 
         self.assertIn("## Scientific context", instruction)
         self.assertIn("`results/posterior.csv`", instruction)
+        self.assertNotIn("\ufffd", instruction)
         self.assertIn('artifacts = ["/app/results/posterior.csv"]', task_toml)
         self.assertIn('field = "statistics"', task_toml)
         self.assertIn('environment_mode = "separate"', task_toml)

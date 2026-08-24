@@ -48,3 +48,6 @@ credentials, task execution, and result collection remain downstream Harbor resp
 - Draft history and later expert reviews are sidecars; neither mutates an original Harbor job.
 - An independent scientist should review the task before it becomes a benchmark item. Task
   authors may test their own oracle, but author validation is not independent approval.
+
+Continue with the [independent task-review workflow](task-review.md) and review the
+[security and collaboration boundaries](task-security.md) before benchmark publication.
