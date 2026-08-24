@@ -13,11 +13,13 @@ from .models import (
 from .render import render_instruction, render_task_toml
 from .store import TaskDraftStore
 from .templates import REQUIRED_TASK_FILES, task_template_root
+from .verifier import CheckResult, evaluate_check, evaluate_checks
 
 __all__ = [
     "ArtifactContract",
     "ArtifactField",
     "ArtifactIssue",
+    "CheckResult",
     "REQUIRED_TASK_FILES",
     "render_instruction",
     "render_task_toml",
@@ -29,4 +31,6 @@ __all__ = [
     "TaskMetadata",
     "VerifierCheck",
     "VerifierFixture",
+    "evaluate_check",
+    "evaluate_checks",
 ]
