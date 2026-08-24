@@ -8,6 +8,7 @@ app = marimo.App(width="full")
 def _():
     import json
     from pathlib import Path
+    import subprocess
 
     import marimo as mo
 
@@ -15,27 +16,41 @@ def _():
         ArtifactContract,
         ArtifactField,
         ScientificBrief,
+        TaskDraftStore,
         TaskDraft,
         TaskMetadata,
         VerifierCheck,
         VerifierFixture,
+        export_task_bundle,
+        harbor_validation_plan,
+        run_harbor_validation,
         run_fixture_workbench,
     )
-    from harbor_marimo.ui import authoring_progress_markdown, task_summary_markdown
+    from harbor_marimo.ui import (
+        authoring_progress_markdown,
+        draft_readiness,
+        task_summary_markdown,
+    )
 
     return (
         ArtifactContract,
         ArtifactField,
         Path,
         ScientificBrief,
+        TaskDraftStore,
         TaskDraft,
         TaskMetadata,
         VerifierCheck,
         VerifierFixture,
         authoring_progress_markdown,
+        draft_readiness,
+        export_task_bundle,
+        harbor_validation_plan,
         json,
         mo,
+        run_harbor_validation,
         run_fixture_workbench,
+        subprocess,
         task_summary_markdown,
     )
 
@@ -584,6 +599,251 @@ def _(
 
 
 @app.cell
+def _(Path, cli, fixture_draft, mo):
+    default_draft_dir = Path(
+        cli.get("draft-dir") or Path.cwd() / "outputs" / "task-drafts"
+    ).expanduser().resolve()
+    default_export_parent = Path(
+        cli.get("output-dir") or Path.cwd() / "outputs" / "harbor-tasks"
+    ).expanduser().resolve()
+    save_directory_input = mo.ui.text(
+        value=str(default_draft_dir),
+        label="Draft history folder",
+        full_width=True,
+    )
+    export_directory_input = mo.ui.text(
+        value=str(default_export_parent),
+        label="Harbor task export folder",
+        full_width=True,
+    )
+    environment_input = mo.ui.dropdown(
+        options={
+            "Local Docker": "docker",
+            "CoreWeave Cloud Sandbox": "cwsandbox",
+        },
+        value="Local Docker",
+        label="Harbor execution environment",
+        full_width=True,
+    )
+    agent_seed = [{"agent": "", "model": ""}]
+    agent_editor = mo.ui.data_editor(
+        agent_seed,
+        label="Optional agent and model smoke tests",
+    )
+    save_draft_button = mo.ui.run_button(label="Save draft revision")
+    export_task_button = mo.ui.run_button(label="Export Harbor task")
+    run_validation_button = mo.ui.run_button(label="Run Harbor validation")
+    validation_timeout_input = mo.ui.number(
+        start=30,
+        stop=max(3600, fixture_draft.agent_timeout_sec),
+        step=30,
+        value=fixture_draft.agent_timeout_sec,
+        label="Maximum seconds per Harbor run",
+    )
+    return (
+        agent_editor,
+        environment_input,
+        export_directory_input,
+        export_task_button,
+        run_validation_button,
+        save_directory_input,
+        save_draft_button,
+        validation_timeout_input,
+    )
+
+
+@app.cell
+def _(
+    Path,
+    TaskDraftStore,
+    export_directory_input,
+    export_task_bundle,
+    export_task_button,
+    fixture_draft,
+    fixture_root,
+    save_directory_input,
+    save_draft_button,
+):
+    save_error = None
+    saved_draft_path = None
+    exported_bundle = None
+    export_error = None
+    export_parent = Path(export_directory_input.value).expanduser().resolve()
+    export_target = export_parent / fixture_draft.task_name
+    if save_draft_button.value:
+        try:
+            saved_draft_path = TaskDraftStore(save_directory_input.value).save(fixture_draft)
+        except (OSError, TypeError, ValueError) as exc:
+            save_error = str(exc)
+    if export_task_button.value:
+        try:
+            exported_bundle = export_task_bundle(
+                fixture_draft,
+                export_target,
+                draft_root=fixture_root,
+            )
+        except (OSError, TypeError, ValueError) as exc:
+            export_error = str(exc)
+    return (
+        export_error,
+        export_parent,
+        export_target,
+        exported_bundle,
+        save_error,
+        saved_draft_path,
+    )
+
+
+@app.cell
+def _(
+    agent_editor,
+    environment_input,
+    export_target,
+    harbor_validation_plan,
+):
+    requested_agents = tuple(
+        (
+            str(row.get("agent") or "").strip(),
+            str(row.get("model") or "").strip() or None,
+        )
+        for row in list(agent_editor.value)
+        if str(row.get("agent") or "").strip()
+    )
+    validation_plan = harbor_validation_plan(
+        export_target,
+        environment=environment_input.value,
+        agents=requested_agents,
+    )
+    return requested_agents, validation_plan
+
+
+@app.cell
+def _(
+    export_target,
+    run_harbor_validation,
+    run_validation_button,
+    subprocess,
+    validation_plan,
+    validation_timeout_input,
+):
+    validation_error = None
+    validation_runs = ()
+    if run_validation_button.value:
+        if not export_target.is_dir():
+            validation_error = "Export the Harbor task before running Harbor validation."
+        else:
+            try:
+                validation_runs = tuple(
+                    run_harbor_validation(
+                        command,
+                        timeout=float(validation_timeout_input.value),
+                    )
+                    for command in validation_plan
+                )
+            except (OSError, ValueError, subprocess.TimeoutExpired) as exc:
+                validation_error = str(exc)
+    return validation_error, validation_runs
+
+
+@app.cell
+def _(
+    agent_editor,
+    draft_readiness,
+    environment_input,
+    export_directory_input,
+    export_error,
+    exported_bundle,
+    fixture_draft,
+    mo,
+    run_validation_button,
+    save_directory_input,
+    save_draft_button,
+    save_error,
+    saved_draft_path,
+    validation_error,
+    validation_plan,
+    validation_runs,
+    validation_timeout_input,
+    export_task_button,
+):
+    readiness_issues = draft_readiness(fixture_draft)
+    readiness_view = (
+        mo.callout(
+            mo.md("\n".join(f"- {item}" for item in readiness_issues)),
+            kind="warn",
+        )
+        if readiness_issues
+        else mo.callout(
+            mo.md("The draft has the minimum content needed for technical validation."),
+            kind="success",
+        )
+    )
+    action_messages = []
+    if saved_draft_path:
+        action_messages.append(f"Draft revision saved to `{saved_draft_path}`.")
+    if save_error:
+        action_messages.append(f"Draft could not be saved: {save_error}")
+    if exported_bundle:
+        action_messages.append(
+            f"Harbor task exported to `{exported_bundle.task_path}` with its review profile."
+        )
+    if export_error:
+        action_messages.append(f"Task could not be exported: {export_error}")
+    action_view = (
+        mo.callout(mo.md("\n\n".join(action_messages)), kind="neutral")
+        if action_messages
+        else mo.md("")
+    )
+    plan_rows = [
+        {
+            "Purpose": command.description,
+            "Command": " ".join(command.argv),
+        }
+        for command in validation_plan
+    ]
+    run_rows = [
+        {
+            "Run": item.kind,
+            "Status": "Passed" if item.passed else "Failed",
+            "Exit code": item.returncode,
+            "Output": (item.stdout or item.stderr)[-500:],
+        }
+        for item in validation_runs
+    ]
+    if validation_error:
+        run_view = mo.callout(mo.md(validation_error), kind="warn")
+    elif run_rows:
+        run_view = mo.ui.table(run_rows, selection=None)
+    else:
+        run_view = mo.md("")
+    validation_dashboard_view = mo.vstack(
+        [
+            mo.md("## 5. Validate and export"),
+            mo.md(
+                "Save retains an auditable draft history. Export creates a standard Harbor "
+                "task directory plus a matching result-review profile. Harbor remains "
+                "responsible for Docker or CoreWeave sandbox execution."
+            ),
+            readiness_view,
+            save_directory_input,
+            save_draft_button,
+            export_directory_input,
+            export_task_button,
+            action_view,
+            mo.md("### Harbor validation plan"),
+            environment_input,
+            agent_editor,
+            validation_timeout_input,
+            mo.ui.table(plan_rows, selection=None),
+            run_validation_button,
+            run_view,
+        ],
+        gap=1,
+    )
+    return (validation_dashboard_view,)
+
+
+@app.cell
 def _(
     author_input,
     conflicts_input,
@@ -629,11 +889,12 @@ def _(
     artifact_contract_view,
     brief_form_view,
     draft_error,
+    fixture_draft,
     fixture_workbench_view,
     mo,
     task_summary_markdown,
+    validation_dashboard_view,
     verifier_builder_view,
-    verifier_draft,
 ):
     error_view = (
         mo.callout(mo.md(draft_error), kind="warn") if draft_error else mo.md("")
@@ -658,7 +919,7 @@ def _(
                         mo.md(authoring_progress_markdown(int(active_step.value))),
                         kind="neutral",
                     ),
-                    mo.md(task_summary_markdown(verifier_draft)),
+                    mo.md(task_summary_markdown(fixture_draft)),
                 ],
                 widths=[1, 2],
                 align="start",
@@ -668,6 +929,7 @@ def _(
             artifact_contract_view,
             verifier_builder_view,
             fixture_workbench_view,
+            validation_dashboard_view,
         ],
         gap=2,
     )
