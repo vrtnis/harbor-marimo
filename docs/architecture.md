@@ -2,6 +2,10 @@
 
 `harbor-marimo` is a read-only analysis and expert-review layer over Harbor output.
 
+The domain-expert applications are organized as the separate `acto` package inside this
+repository. See [Acto package structure](acto-package.md) for the package responsibilities
+and compatibility policy.
+
 ```text
 Harbor execution (Docker or cloud sandbox)
                 |
