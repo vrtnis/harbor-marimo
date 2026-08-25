@@ -27,14 +27,20 @@ def _():
         run_fixture_workbench,
     )
     from acto.ui import (
-        authoring_progress_markdown,
+        AUTHORING_STEPS,
+        card_style,
         draft_readiness,
-        task_summary_markdown,
+        product_css,
+        section_header_html,
+        studio_header_html,
+        studio_progress_html,
+        studio_summary_html,
     )
 
     return (
         ArtifactContract,
         ArtifactField,
+        AUTHORING_STEPS,
         Path,
         ScientificBrief,
         TaskDraftStore,
@@ -42,21 +48,25 @@ def _():
         TaskMetadata,
         VerifierCheck,
         VerifierFixture,
-        authoring_progress_markdown,
+        card_style,
         draft_readiness,
         export_task_bundle,
         harbor_validation_plan,
         json,
         mo,
+        product_css,
         run_harbor_validation,
         run_fixture_workbench,
         subprocess,
-        task_summary_markdown,
+        section_header_html,
+        studio_header_html,
+        studio_progress_html,
+        studio_summary_html,
     )
 
 
 @app.cell
-def _(Path, ScientificBrief, TaskDraft, TaskMetadata, json, mo):
+def _(AUTHORING_STEPS, Path, ScientificBrief, TaskDraft, TaskMetadata, json, mo):
     cli = mo.cli_args()
     requested_draft = cli.get("draft")
     draft_path = Path(requested_draft).expanduser().resolve() if requested_draft else None
@@ -76,12 +86,14 @@ def _(Path, ScientificBrief, TaskDraft, TaskMetadata, json, mo):
                 instruction="Describe the scientific work the agent must complete.",
             ),
         )
-    active_step = mo.ui.number(
-        start=1,
-        stop=5,
-        step=1,
-        value=1,
-        label="Authoring step",
+    active_step = mo.ui.dropdown(
+        options={
+            f"{index}. {label}": index
+            for index, label in enumerate(AUTHORING_STEPS, start=1)
+        },
+        value=f"1. {AUTHORING_STEPS[0]}",
+        label="Current step",
+        full_width=True,
     )
     return active_step, cli, draft, draft_error, draft_path
 
@@ -295,7 +307,15 @@ def _(
 
 
 @app.cell
-def _(artifact_editor, artifact_error, contract_draft, field_editor, mo):
+def _(
+    artifact_editor,
+    artifact_error,
+    card_style,
+    contract_draft,
+    field_editor,
+    mo,
+    section_header_html,
+):
     artifact_error_view = (
         mo.callout(mo.md(artifact_error), kind="warn")
         if artifact_error
@@ -303,15 +323,16 @@ def _(artifact_editor, artifact_error, contract_draft, field_editor, mo):
     )
     artifact_contract_view = mo.vstack(
         [
-            mo.md("## 2. Specify the result artifacts"),
-            mo.md(
-                "List the evidence a successful agent must leave behind. Paths are relative "
-                "to the task workspace; use a separate row for every result file."
+            mo.Html(
+                section_header_html(
+                    2,
+                    "Specify result artifacts",
+                    "Define the evidence a successful agent must leave behind.",
+                )
             ),
             artifact_editor,
             mo.md(
-                "For structured results, list the fields that must be present. The "
-                "**artifact** value must match a result-file path above."
+                "For structured results, list required fields. **Artifact** must match a path above."
             ),
             field_editor,
             artifact_error_view,
@@ -321,7 +342,7 @@ def _(artifact_editor, artifact_error, contract_draft, field_editor, mo):
             ),
         ],
         gap=1,
-    )
+    ).style(card_style())
     return (artifact_contract_view,)
 
 
@@ -414,7 +435,14 @@ def _(VerifierCheck, check_editor, contract_draft, json):
 
 
 @app.cell
-def _(check_editor, mo, verifier_draft, verifier_error):
+def _(
+    card_style,
+    check_editor,
+    mo,
+    section_header_html,
+    verifier_draft,
+    verifier_error,
+):
     verifier_error_view = (
         mo.callout(mo.md(verifier_error), kind="warn")
         if verifier_error
@@ -422,12 +450,12 @@ def _(check_editor, mo, verifier_draft, verifier_error):
     )
     verifier_builder_view = mo.vstack(
         [
-            mo.md("## 3. Build acceptance checks"),
-            mo.md(
-                "Turn each scientific acceptance criterion into an observable test. "
-                "Supported check types are `file_exists`, `csv_columns`, `column_min`, "
-                "`column_max`, and `json_equals`. Mark a criterion as expert-only when "
-                "scientific judgment cannot be reduced to a threshold."
+            mo.Html(
+                section_header_html(
+                    3,
+                    "Build acceptance checks",
+                    "Connect scientific criteria to observable evidence.",
+                )
             ),
             check_editor,
             verifier_error_view,
@@ -437,7 +465,7 @@ def _(check_editor, mo, verifier_draft, verifier_error):
             ),
         ],
         gap=1,
-    )
+    ).style(card_style())
     return (verifier_builder_view,)
 
 
@@ -536,12 +564,14 @@ def _(fixture_draft, fixture_root, run_fixture_workbench, test_fixtures_button):
 
 @app.cell
 def _(
+    card_style,
     fixture_editor,
     fixture_error,
     fixture_report,
     fixture_root_input,
     mo,
     oracle_path_input,
+    section_header_html,
     test_fixtures_button,
 ):
     if fixture_report is None:
@@ -580,11 +610,12 @@ def _(
     )
     fixture_workbench_view = mo.vstack(
         [
-            mo.md("## 4. Test known examples"),
-            mo.md(
-                "Provide at least one result that should pass and one that should fail. "
-                "These examples make the scientific boundary explicit and guard against "
-                "a verifier that accepts everything."
+            mo.Html(
+                section_header_html(
+                    4,
+                    "Test known examples",
+                    "Challenge the verifier with results that should pass and fail.",
+                )
             ),
             fixture_root_input,
             oracle_path_input,
@@ -594,7 +625,7 @@ def _(
             fixture_result_view,
         ],
         gap=1,
-    )
+    ).style(card_style())
     return (fixture_workbench_view,)
 
 
@@ -697,6 +728,7 @@ def _(
 @app.cell
 def _(
     agent_editor,
+    card_style,
     environment_input,
     export_target,
     harbor_validation_plan,
@@ -748,6 +780,7 @@ def _(
 @app.cell
 def _(
     agent_editor,
+    card_style,
     draft_readiness,
     environment_input,
     export_directory_input,
@@ -759,6 +792,7 @@ def _(
     save_directory_input,
     save_draft_button,
     save_error,
+    section_header_html,
     saved_draft_path,
     validation_error,
     validation_plan,
@@ -818,11 +852,12 @@ def _(
         run_view = mo.md("")
     validation_dashboard_view = mo.vstack(
         [
-            mo.md("## 5. Validate and export"),
-            mo.md(
-                "Save retains an auditable draft history. Export creates a standard Harbor "
-                "task directory plus a matching result-review profile. Harbor remains "
-                "responsible for Docker or CoreWeave sandbox execution."
+            mo.Html(
+                section_header_html(
+                    5,
+                    "Validate and export",
+                    "Save the draft, export the Harbor task, and run final checks.",
+                )
             ),
             readiness_view,
             save_directory_input,
@@ -839,13 +874,14 @@ def _(
             run_view,
         ],
         gap=1,
-    )
+    ).style(card_style())
     return (validation_dashboard_view,)
 
 
 @app.cell
 def _(
     author_input,
+    card_style,
     conflicts_input,
     context_input,
     difficulty_input,
@@ -854,16 +890,19 @@ def _(
     instruction_input,
     mo,
     organization_input,
+    section_header_html,
     subfield_input,
     task_name_input,
     title_input,
 ):
     brief_form_view = mo.vstack(
         [
-            mo.md("## 1. Define the scientific task"),
-            mo.md(
-                "Write for both an agent attempting the work and an independent scientist "
-                "reviewing whether the task is meaningful."
+            mo.Html(
+                section_header_html(
+                    1,
+                    "Define the scientific task",
+                    "Describe the work for both the agent and an independent reviewer.",
+                )
             ),
             task_name_input,
             title_input,
@@ -876,15 +915,13 @@ def _(
             conflicts_input,
         ],
         gap=1,
-    )
+    ).style(card_style())
     return (brief_form_view,)
 
 
 @app.cell
 def _(
     active_step,
-    authoring_progress_markdown,
-    authored_draft,
     authored_draft_error,
     artifact_contract_view,
     brief_form_view,
@@ -892,7 +929,10 @@ def _(
     fixture_draft,
     fixture_workbench_view,
     mo,
-    task_summary_markdown,
+    product_css,
+    studio_header_html,
+    studio_progress_html,
+    studio_summary_html,
     validation_dashboard_view,
     verifier_builder_view,
 ):
@@ -906,25 +946,20 @@ def _(
     )
     mo.vstack(
         [
-            mo.md(
-                "# Terminal-Bench Science Task Studio\n\n"
-                "Turn a scientific question into a reviewable Harbor task. "
-                "No Python or container editing is required in this workspace."
-            ),
+            mo.Html(product_css()),
+            mo.Html(studio_header_html()),
             error_view,
             authored_error_view,
-            mo.hstack(
+            mo.vstack(
                 [
-                    mo.callout(
-                        mo.md(authoring_progress_markdown(int(active_step.value))),
-                        kind="neutral",
+                    active_step.style(
+                        {"margin-left": "auto", "max-width": "260px"}
                     ),
-                    mo.md(task_summary_markdown(fixture_draft)),
+                    mo.Html(studio_progress_html(int(active_step.value))),
                 ],
-                widths=[1, 2],
-                align="start",
-                gap=2,
+                gap=0.5,
             ),
+            mo.Html(studio_summary_html(fixture_draft)),
             brief_form_view,
             artifact_contract_view,
             verifier_builder_view,
