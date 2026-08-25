@@ -22,6 +22,13 @@ def _():
         reviewer_assignment_issues,
         rubric_for_role,
     )
+    from acto.ui import (
+        card_style,
+        compact_task_instruction,
+        product_css,
+        review_header_html,
+        section_header_html,
+    )
 
     return (
         Path,
@@ -31,11 +38,16 @@ def _():
         TaskReview,
         TaskReviewStore,
         TaskReviewVerdict,
+        card_style,
+        compact_task_instruction,
         load_task_bundle,
         mo,
+        product_css,
         read_task_evidence,
+        review_header_html,
         reviewer_assignment_issues,
         rubric_for_role,
+        section_header_html,
     )
 
 
@@ -300,32 +312,45 @@ def _(mo, saved_review_path, task_bundle, task_review_store):
 
 
 @app.cell
-def _(mo, task_bundle):
-    metadata = task_bundle.config.get("metadata") or {}
+def _(card_style, compact_task_instruction, mo, section_header_html, task_bundle):
+    task_metadata = task_bundle.config.get("metadata") or {}
+    visible_files = [
+        item
+        for item in task_bundle.files
+        if "__pycache__" not in item.path and not item.path.endswith(".pyc")
+    ]
+    task_file_inventory = mo.ui.table(
+        [
+            {
+                "File": item.path,
+                "Bytes": item.size,
+                "SHA-256": item.sha256[:16],
+            }
+            for item in visible_files
+        ],
+        selection=None,
+    )
+    task_instruction_view = mo.md(
+        compact_task_instruction(task_bundle.instruction)
+    ).style({"max-height": "310px", "overflow": "auto", "padding-right": "8px"})
     task_overview = mo.vstack(
         [
-            mo.md(
-                f"## {task_bundle.task_name}\n\n"
-                f"**Task author:** {task_bundle.task_author}  \n"
-                f"**Domain:** {metadata.get('domain') or 'Not specified'}  \n"
-                f"**Field:** {metadata.get('field') or 'Not specified'}"
+            mo.Html(
+                section_header_html(
+                    1,
+                    "Task brief",
+                    "Review the task as written before inspecting its implementation.",
+                    responsive_grid_item=True,
+                )
             ),
-            mo.accordion({"Task instruction": mo.md(task_bundle.instruction)}),
-            mo.ui.table(
-                [
-                    {
-                        "File": item.path,
-                        "Bytes": item.size,
-                        "SHA-256": item.sha256[:16],
-                    }
-                    for item in task_bundle.files
-                ],
-                selection=None,
+            mo.callout(
+                task_instruction_view,
+                kind="neutral",
             ),
         ],
         gap=1,
-    )
-    return (task_overview,)
+    ).style(card_style())
+    return task_file_inventory, task_metadata, task_overview
 
 
 @app.cell
@@ -343,7 +368,14 @@ def _(mo, task_bundle):
 
 
 @app.cell
-def _(evidence_picker, mo, read_task_evidence, task_bundle):
+def _(
+    card_style,
+    evidence_picker,
+    mo,
+    read_task_evidence,
+    section_header_html,
+    task_bundle,
+):
     evidence_preview_error = None
     try:
         evidence_preview = read_task_evidence(task_bundle, evidence_picker.value)
@@ -352,24 +384,35 @@ def _(evidence_picker, mo, read_task_evidence, task_bundle):
         evidence_preview_error = str(exc)
     evidence_preview_view = mo.vstack(
         [
+            mo.Html(
+                section_header_html(
+                    2,
+                    "Inspect task evidence",
+                    "Compare the instruction, verifier, oracle, and environment.",
+                )
+            ),
             evidence_picker,
             (
                 mo.callout(mo.md(evidence_preview_error), kind="warn")
                 if evidence_preview_error
-                else mo.accordion(
+                else mo.plain_text(evidence_preview).style(
                     {
-                        "Read-only file content": mo.plain_text(evidence_preview)
+                        "max-height": "260px",
+                        "overflow": "auto",
+                        "padding": "12px",
+                        "background": "#f7f8fb",
+                        "border": "1px solid #e3e7ee",
+                        "border-radius": "9px",
                     }
                 )
             ),
             mo.md(
-                "Use the evidence keys shown in the rubric table to cite the instruction, "
-                "verifier, oracle, or environment supporting each finding. Files are read "
-                "as inert text and are never executed by this review app."
+                "Cite the evidence keys shown in the rubric. Files are displayed as "
+                "read-only text and are never executed here."
             ),
         ],
         gap=1,
-    )
+    ).style(card_style())
     return (evidence_preview_view,)
 
 
@@ -377,11 +420,15 @@ def _(evidence_picker, mo, read_task_evidence, task_bundle):
 def _(
     assessment_editor,
     bundle_error,
+    card_style,
     conflict_input,
     evidence_preview_view,
     follow_up_input,
     mo,
+    prior_reviews,
+    product_css,
     review_directory,
+    review_header_html,
     review_note_input,
     review_history_view,
     review_mode_view,
@@ -390,7 +437,11 @@ def _(
     save_error,
     save_review_button,
     saved_review_path,
+    section_header_html,
     submission_error,
+    task_bundle,
+    task_file_inventory,
+    task_metadata,
     task_overview,
     task_path_input,
     verdict_input,
@@ -409,38 +460,94 @@ def _(
         if saved_review_path
         else mo.md("")
     )
-    mo.vstack(
+    reviewer_panel = mo.vstack(
         [
-            mo.md(
-                "# Independent scientific task review\n\n"
-                "Review the benchmark task itself before agents are graded on it. "
-                "Author validation can improve a task, but only an unconflicted reviewer "
-                "can approve it for benchmark use."
+            mo.Html(
+                section_header_html(
+                    3,
+                    "Reviewer assignment",
+                    "Confirm independence before recording a judgment.",
+                    responsive_grid_item=True,
+                )
             ),
-            task_path_input,
-            warning_view,
-            task_overview,
-            evidence_preview_view,
-            mo.md("## Reviewer assignment"),
             reviewer_input,
             role_input,
             conflict_input,
             review_mode_view,
-            mo.md("### Prior reviews"),
+            mo.md("### Previous reviews"),
             review_history_view,
-            mo.md("## Rubric assessment"),
+        ],
+        gap=1,
+    ).style(card_style())
+    rubric_panel = mo.vstack(
+        [
+            mo.Html(
+                section_header_html(
+                    4,
+                    "Rubric assessment",
+                    "Record a finding and evidence for each review criterion.",
+                )
+            ),
             assessment_editor,
-            mo.md("## Decision"),
+        ],
+        gap=1,
+    ).style(card_style())
+    decision_panel = mo.vstack(
+        [
+            mo.Html(
+                section_header_html(
+                    5,
+                    "Decision",
+                    "Summarize the judgment and any required follow-up.",
+                )
+            ),
             verdict_input,
             review_note_input,
             follow_up_input,
             save_review_button,
-            saved_view,
-            mo.accordion(
-                {"Review storage": mo.md(f"Sidecars are stored under `{review_directory}`.")}
-            ),
         ],
-        gap=2,
+        gap=1,
+    ).style(card_style())
+    technical_details = mo.accordion(
+        {
+            "Technical details": mo.vstack(
+                [
+                    task_path_input,
+                    task_file_inventory,
+                    mo.md(f"Review sidecars are stored under `{review_directory}`."),
+                ],
+                gap=1,
+            )
+        }
+    )
+    header_view = mo.Html(
+        review_header_html(
+            task_name=task_bundle.task_name,
+            author=task_bundle.task_author,
+            domain=str(task_metadata.get("domain") or ""),
+            field=str(task_metadata.get("field") or ""),
+            evidence_count=len(task_bundle.evidence()),
+            prior_review_count=len(prior_reviews),
+        )
+    )
+    mo.vstack(
+        [
+            mo.Html(product_css()),
+            header_view,
+            warning_view,
+            mo.hstack(
+                [task_overview, reviewer_panel],
+                widths=[3, 2],
+                align="start",
+                gap=1,
+            ),
+            evidence_preview_view,
+            rubric_panel,
+            decision_panel,
+            saved_view,
+            technical_details,
+        ],
+        gap=1.25,
     )
     return
 
