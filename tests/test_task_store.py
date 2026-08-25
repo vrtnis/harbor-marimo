@@ -19,6 +19,7 @@ class TaskDraftStoreTests(unittest.TestCase):
             store.save(updated)
 
             self.assertTrue(destination.is_file())
+            self.assertGreater(updated.updated_at, draft.updated_at)
             self.assertEqual(store.get(draft.draft_id), updated)
             self.assertEqual(store.list(), (updated,))
             self.assertEqual(len(store.revisions(draft.draft_id)), 2)

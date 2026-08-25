@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import asdict, dataclass, field, replace
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 import re
 from typing import Any, Mapping
 from uuid import uuid4
@@ -222,7 +222,7 @@ class TaskDraft:
         )
 
     def updated(self, **changes: Any) -> "TaskDraft":
-        return replace(self, updated_at=_timestamp(), **changes)
+        return replace(self, updated_at=_timestamp_after(self.updated_at), **changes)
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
@@ -272,3 +272,16 @@ def _mapping(value: Any) -> Mapping[str, Any]:
 
 def _timestamp() -> str:
     return datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
+
+
+def _timestamp_after(previous: str) -> str:
+    """Return a timestamp later than the prior revision on coarse clocks."""
+
+    current = datetime.now(timezone.utc)
+    try:
+        prior = datetime.fromisoformat(previous.replace("Z", "+00:00"))
+    except ValueError:
+        prior = current - timedelta(microseconds=1)
+    if current <= prior:
+        current = prior + timedelta(microseconds=1)
+    return current.isoformat().replace("+00:00", "Z")
