@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
+from acto.profiles import load_review_profile
+
 from .loader import TaskBundle
 
 
@@ -22,16 +24,19 @@ def result_review_command(
     review_dir: str | Path = "outputs/result-reviews",
     executable: str = "harbor-marimo",
 ) -> tuple[str, ...]:
-    """Return the science-review handoff without starting a server."""
+    """Return the profile-selected result-review handoff without starting a server."""
+
+    profile_path = result_review_profile_path(bundle)
+    domain = load_review_profile(profile_path).domain_adapter
 
     return (
         executable,
         "review",
         str(Path(harbor_job).expanduser().resolve()),
         "--domain",
-        "science",
+        domain,
         "--profile",
-        str(result_review_profile_path(bundle)),
+        str(profile_path),
         "--review-dir",
         str(Path(review_dir).expanduser().resolve()),
     )

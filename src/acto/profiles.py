@@ -65,10 +65,13 @@ class ReviewProfile:
     acceptance_criteria: tuple[ReviewCriterion, ...] = ()
     artifact_labels: Mapping[str, ArtifactPresentation] = field(default_factory=dict)
     glossary: Mapping[str, str] = field(default_factory=dict)
+    domain_adapter: str = "science"
 
     def __post_init__(self) -> None:
         if not self.title.strip():
             raise ValueError("Review profile title cannot be empty.")
+        if not self.domain_adapter.strip():
+            raise ValueError("Review profile domain_adapter cannot be empty.")
         criterion_ids = [criterion.id for criterion in self.acceptance_criteria]
         if len(criterion_ids) != len(set(criterion_ids)):
             raise ValueError("Review profile criterion ids must be unique.")
@@ -99,6 +102,7 @@ class ReviewProfile:
             raise ValueError("Review profile glossary must be an object.")
         return cls(
             title=str(value.get("title") or ""),
+            domain_adapter=str(value.get("domain_adapter") or "science"),
             question=str(value.get("question") or ""),
             summary=str(value.get("summary") or ""),
             acceptance_criteria=tuple(

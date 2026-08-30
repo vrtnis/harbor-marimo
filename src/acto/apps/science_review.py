@@ -13,6 +13,12 @@ def _():
     import marimo as mo
 
     from harbor_marimo import load
+    from acto.domains.microarchitecture import (
+        MicroarchitectureAdapter,
+        microarchitecture_findings,
+        microarchitecture_glossary,
+        preview_microarchitecture_artifact,
+    )
     from acto.domains.science import (
         ScienceAdapter,
         compare_trials,
@@ -46,6 +52,7 @@ def _():
         CriterionStatus,
         EvidenceReference,
         JsonReviewStore,
+        MicroarchitectureAdapter,
         Path,
         ScienceAdapter,
         compare_trials,
@@ -59,8 +66,11 @@ def _():
         json,
         load,
         load_review_profile,
+        microarchitecture_findings,
+        microarchitecture_glossary,
         mo,
         preview_artifact,
+        preview_microarchitecture_artifact,
         record_review,
         review_header_markdown,
         review_steps_markdown,
@@ -101,6 +111,9 @@ def _(JsonReviewStore, Path, json, load_review_profile, mo):
             profile_error = str(exc)
     guided = str(cli.get("guided") or "").lower() in {"1", "true", "yes", "on"}
     developer = str(cli.get("developer") or "").lower() in {"1", "true", "yes", "on"}
+    requested_domain = str(
+        cli.get("domain") or (profile.domain_adapter if profile else "science")
+    )
     source_input = mo.ui.text(
         value=str(default_source),
         label="Harbor job, trial, result, or ATIF path",
@@ -118,6 +131,7 @@ def _(JsonReviewStore, Path, json, load_review_profile, mo):
         profile,
         profile_error,
         profile_path,
+        requested_domain,
         review_directory,
         review_store,
         source_input,
@@ -173,7 +187,7 @@ def _(mo, profile, tables, trial_picker):
     artifact_picker = mo.ui.dropdown(
         options=artifact_options,
         value=next(iter(artifact_options)),
-        label="Scientific artifact",
+        label="Result artifact",
         full_width=True,
     )
     return artifact_picker, selected_artifacts, selected_trial
@@ -181,21 +195,39 @@ def _(mo, profile, tables, trial_picker):
 
 @app.cell
 def _(
+    MicroarchitectureAdapter,
     ScienceAdapter,
     bundle,
     criteria_rows,
+    diagnostic_findings,
     evidence_options,
     guided,
     glossary_markdown,
+    microarchitecture_findings,
+    microarchitecture_glossary,
     mo,
+    preview_artifact,
+    preview_microarchitecture_artifact,
     profile,
+    requested_domain,
     review_header_markdown,
     review_steps_markdown,
     science_glossary,
     selected_trial,
     technical_details_markdown,
 ):
-    domain_view = ScienceAdapter(profile).build_view(
+    microarchitecture_adapter = MicroarchitectureAdapter(profile)
+    if requested_domain == "microarchitecture" or microarchitecture_adapter.supports(bundle):
+        adapter = microarchitecture_adapter
+        artifact_previewer = preview_microarchitecture_artifact
+        diagnostic_finder = microarchitecture_findings
+        glossary = microarchitecture_glossary(profile)
+    else:
+        adapter = ScienceAdapter(profile)
+        artifact_previewer = preview_artifact
+        diagnostic_finder = diagnostic_findings
+        glossary = science_glossary(profile)
+    domain_view = adapter.build_view(
         bundle, trial_id=selected_trial["trial_id"]
     )
     header_view = mo.md(review_header_markdown(domain_view, guided=guided))
@@ -212,14 +244,14 @@ def _(
     glossary_view = mo.accordion(
         {
             "Terms used in this review": mo.md(
-                glossary_markdown(science_glossary(profile))
+                glossary_markdown(glossary)
             )
         }
     )
     onboarding_view = (
         mo.callout(
             mo.md(
-                "This is a guided training review. Work from the scientific question "
+                "This is a guided training review. Work from the task question "
                 "to the evidence, compare attempts, then record your independent judgment."
             ),
             kind="info",
@@ -233,7 +265,9 @@ def _(
         full_width=True,
     )
     return (
+        artifact_previewer,
         criteria_view,
+        diagnostic_finder,
         domain_view,
         evidence_citation_input,
         glossary_view,
@@ -250,7 +284,7 @@ def _(
     domain_view,
     evidence_markdown,
     mo,
-    preview_artifact,
+    artifact_previewer,
     selected_artifacts,
 ):
     artifact_index = int(artifact_picker.value)
@@ -258,7 +292,7 @@ def _(
         selected_artifacts[artifact_index] if artifact_index >= 0 else None
     )
     artifact_preview = (
-        preview_artifact(selected_artifact) if selected_artifact else None
+        artifact_previewer(selected_artifact) if selected_artifact else None
     )
     selected_evidence = (
         domain_view.evidence[artifact_index] if artifact_index >= 0 else None
@@ -276,7 +310,7 @@ def _(domain_view, mo, review_store, selected_trial):
     prior_review = review_store.latest(
         job_id=selected_trial["job_id"],
         trial_id=selected_trial["trial_id"],
-        domain="science",
+        domain=domain_view.domain,
     )
     decision_options = {
         "Approve": "approve",
@@ -322,8 +356,8 @@ def _(domain_view, mo, review_store, selected_trial):
     )
     note_input = mo.ui.text_area(
         value=prior_review.note if prior_review else "",
-        label="Scientific rationale",
-        placeholder="Reference convergence, validity, artifacts, or follow-up work.",
+        label="Expert rationale",
+        placeholder="Reference validity, metrics, artifacts, or follow-up work.",
         rows=5,
         full_width=True,
     )
@@ -350,7 +384,7 @@ def _(domain_view, mo, review_store, selected_trial):
         label="Confidence",
         show_value=True,
     )
-    save_button = mo.ui.run_button(label="Save scientific review")
+    save_button = mo.ui.run_button(label="Save expert review")
     return (
         confidence_input,
         criterion_assessment_view,
@@ -435,7 +469,7 @@ def _(
                 review_store,
                 job_id=selected_trial["job_id"],
                 trial_id=selected_trial["trial_id"],
-                domain="science",
+                domain=domain_view.domain,
                 verdict=decision_input.value,
                 note=note_input.value.strip(),
                 reviewer=reviewer_input.value.strip() or None,
@@ -495,7 +529,7 @@ def _(artifact_preview, escape, mo):
 def _(
     bundle,
     compare_trials,
-    diagnostic_findings,
+    diagnostic_finder,
     expert_comparison_rows,
     mo,
     selected_trial,
@@ -503,7 +537,7 @@ def _(
     comparison_view = mo.ui.table(
         expert_comparison_rows(compare_trials(bundle)), selection=None
     )
-    findings = diagnostic_findings(bundle, trial_id=selected_trial["trial_id"])
+    findings = diagnostic_finder(bundle, trial_id=selected_trial["trial_id"])
     findings_view = (
         mo.ui.table(
             [
@@ -517,7 +551,7 @@ def _(
             selection=None,
         )
         if findings
-        else mo.md("No explicit convergence or failure signal was found in verifier text.")
+        else mo.md("No task-specific signal was found in verifier text.")
     )
     return comparison_view, findings_view
 
@@ -578,7 +612,7 @@ def _(
             error_view,
             profile_error_view,
             mo.hstack([trial_picker, artifact_picker], widths="equal"),
-            mo.md("## Collected scientific evidence"),
+            mo.md("## Collected task evidence"),
             evidence_context_view,
             preview_view,
             mo.md("## Verifier diagnostic signals"),

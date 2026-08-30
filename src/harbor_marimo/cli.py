@@ -65,7 +65,7 @@ def _parser() -> argparse.ArgumentParser:
     review.add_argument("paths", nargs=1, help="Harbor job, trial, result, or ATIF path.")
     review.add_argument(
         "--domain",
-        choices=("financial", "science"),
+        choices=("financial", "science", "microarchitecture"),
         default="financial",
         help="Domain adapter name.",
     )
@@ -197,7 +197,7 @@ def normalized_argv(argv: Sequence[str]) -> list[str]:
 def marimo_command(args: argparse.Namespace) -> list[str]:
     app_name = "analysis.py"
     if args.command == "review":
-        app_name = "science_review.py" if args.domain == "science" else "expert_review.py"
+        app_name = "expert_review.py" if args.domain == "financial" else "science_review.py"
     elif args.command == "author":
         app_name = "task_studio.py"
     elif args.command == "review-task":

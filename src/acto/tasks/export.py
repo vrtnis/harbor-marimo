@@ -95,6 +95,7 @@ def review_profile_payload(draft: TaskDraft) -> dict[str, object]:
     ]
     return {
         "title": draft.brief.title,
+        "domain_adapter": "science",
         "question": draft.brief.instruction,
         "summary": draft.brief.research_context,
         "acceptance_criteria": criteria,
