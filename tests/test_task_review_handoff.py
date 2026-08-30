@@ -30,6 +30,18 @@ class TaskReviewHandoffTests(unittest.TestCase):
                 exported.review_profile_path,
             )
 
+    def test_handoff_uses_domain_adapter_declared_by_adjacent_profile(self) -> None:
+        task = ROOT / "examples" / "microarchitecture-modeling" / "microarch-modeling"
+
+        command = result_review_command(
+            load_task_bundle(task), ROOT / "outputs" / "microarchitecture-job"
+        )
+
+        self.assertEqual(
+            command[command.index("--domain") + 1],
+            "microarchitecture",
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

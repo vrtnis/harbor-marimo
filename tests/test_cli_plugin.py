@@ -89,6 +89,27 @@ class CliTests(unittest.TestCase):
         self.assertEqual(command[command.index("--guided") + 1], "true")
         self.assertNotIn("--developer", command)
 
+    def test_microarchitecture_review_uses_scientific_result_app(self):
+        args = SimpleNamespace(
+            command="review",
+            paths=["job"],
+            domain="microarchitecture",
+            review_dir="reviews",
+            port=None,
+            host="127.0.0.1",
+            headless=False,
+            token=None,
+            profile="examples/microarchitecture-modeling/microarch-modeling.review-profile.json",
+            task=None,
+            guided=False,
+            developer=False,
+        )
+
+        command = marimo_command(args)
+
+        self.assertEqual(Path(command[command.index("--") - 1]).name, "science_review.py")
+        self.assertEqual(command[command.index("--domain") + 1], "microarchitecture")
+
     def test_science_review_can_derive_profile_from_exported_task(self):
         with tempfile.TemporaryDirectory() as temp:
             task = Path(temp) / "posterior-check"
