@@ -7,5 +7,6 @@ standard Harbor job and task formats used for execution and evidence exchange.
 - [Scientific result review](../science-review/README.md)
 - [Scientific task authoring](../science-task-authoring/README.md)
 - [Independent scientific task review](../science-task-review/README.md)
+- [Terminal-Bench Science microarchitecture task and review](../microarchitecture-modeling/README.md)
 
 The examples are illustrative repository fixtures, not records of an Acto production run.

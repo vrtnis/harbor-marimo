@@ -114,7 +114,9 @@ artifact handoff.
 - **Scientific:** An example Task Studio supports creating benchmark tasks, acceptance
   criteria, verifiers, and fixtures. The scientific applications also demonstrate
   independent task review, convergence signals, trial comparison, and persisted expert
-  judgments.
+  judgments. A pinned Terminal-Bench Science microarchitecture task adds an
+  electrical-engineering example centered on ONNX model accuracy, ranking, and design
+  selection.
 
   ```bash
   uv run acto studio examples/science-task-authoring/draft.json --port 2722
@@ -124,6 +126,7 @@ artifact handoff.
 
   See the [task-authoring](examples/science-task-authoring/README.md) and
   [scientific review](examples/science-review/README.md) examples, plus the
+  [microarchitecture example](examples/microarchitecture-modeling/README.md) and
   [task-review lifecycle](docs/task-review.md).
 
 - **Financial:** An example result-review application adds workbook-specific evidence and
