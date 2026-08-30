@@ -1,0 +1,23 @@
+{
+  "id": "microarchitecture-reference-fixture",
+  "name": "Microarchitecture result-review interface fixture",
+  "source": "reconstructed-upstream-reference-fixture",
+  "started_at": "2026-08-30T12:00:00Z",
+  "finished_at": "2026-08-30T12:01:00Z",
+  "stats": {
+    "n_completed_trials": 1,
+    "n_errored_trials": 0
+  },
+  "trial_results": [
+    {
+      "id": "microarchitecture-reference",
+      "trial_name": "microarch-modeling__reference",
+      "task_name": "terminal-bench-science/microarch-modeling",
+      "verifier_result": {
+        "rewards": {
+          "reward": 1.0
+        }
+      }
+    }
+  ]
+}
